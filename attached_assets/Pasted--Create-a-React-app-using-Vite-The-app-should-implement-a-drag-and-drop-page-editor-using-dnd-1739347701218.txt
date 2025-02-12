@@ -1,0 +1,60 @@
+```
+Create a React app using Vite.  The app should implement a drag-and-drop page editor using @dnd-kit/core and @dnd-kit/sortable.  The editor should be able to handle the following JSON structure for page templates:
+
+```json
+{
+  "name": "<name of template>",
+  "pages": [
+    {
+      "name": "<name of page>",
+      "metadata": {
+        "title": "<title of page>"
+      },
+      "content": {
+        "rows": [
+          {
+            "columns": [
+              {
+                "type": "<col 1-12>", // e.g., "col-6", "col-12"
+                "content": [
+                  {
+                    "blocktype": "<text|image|...>",
+                    "properties": [ // style properties
+                      { "name": "<property name>", "value": "<property value>" }
+                    ],
+                    "attributes": [ // other attributes
+                      { "name": "<attribute name>", "value": "<attribute value>" }
+                    ],
+                    "innerHtmlOrText": "for rich text/html block and custom" 
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+The app should:
+
+1.  Initialize with the provided JSON structure (you can hardcode a sample).
+2.  Allow users to drag and drop:
+    *   Blocks within a column to reorder them.
+    *   Columns within a row to reorder them.
+    *   Rows within the page to reorder them.
+3.  Display the content of text blocks (using `contentEditable` and `dangerouslySetInnerHTML`) and allow users to edit the text directly in the editor.  Changes to the text content should update the underlying JSON data.
+4.  Display a JSON representation of the current page data below the editor.  This should update dynamically as the user interacts with the editor.
+5.  Use a SortableContext to manage the draggable elements.  Ensure proper unique IDs are assigned to rows, columns, and blocks for dnd-kit to function correctly.
+6.  Include necessary styling to clearly distinguish rows, columns, and blocks in the editor.  Make it visually clear what can be dragged and dropped.
+7.  Use the `useDnd` hook for drag and drop interactions.
+8.  Handle the `handleDragEnd` event to update the JSON data after a drag operation.  Make sure to update the state with the modified JSON so the UI re-renders.
+
+Focus on implementing the core drag-and-drop functionality and text editing.  You don't need to implement image uploads or other block types for this prompt.
+
+Provide the complete React code for the app.  Assume the user has already installed `react`, `vite`, `@dnd-kit/core`, and `@dnd-kit/sortable`.  If not, include the installation commands in the README.md.  The app should be runnable directly from the Replit environment.
+```
+
+This prompt is very detailed and should give you a good starting point for a Replit project. It covers all the essential aspects of the task, including the JSON structure, drag-and-drop requirements, text editing, and dynamic JSON display.  It also emphasizes the use of `dnd-kit` and the importance of unique IDs.  Remember to include a `README.md` in your Replit with instructions on how to run the app.
