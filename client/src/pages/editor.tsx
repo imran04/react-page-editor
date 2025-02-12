@@ -196,15 +196,24 @@ export default function Editor() {
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-3xl font-bold">Page Editor</h1>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowJsonPreview(!showJsonPreview)}
-                className="gap-2"
-              >
-                <Code className="h-4 w-4" />
-                {showJsonPreview ? 'Hide' : 'Show'} JSON
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleAddRow}
+                  className="gap-2"
+                >
+                  Add Row
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowJsonPreview(!showJsonPreview)}
+                  className="gap-2"
+                >
+                  <Code className="h-4 w-4" />
+                  {showJsonPreview ? 'Hide' : 'Show'} JSON
+                </Button>
+              </div>
             </div>
 
             <DndContext
@@ -228,7 +237,7 @@ export default function Editor() {
                       }
                     }}
                   >
-                    <p className="text-muted-foreground">Drop columns here to create a new row</p>
+                    <p className="text-muted-foreground">Drop columns here or click "Add Row" to create a new row</p>
                   </div>
                 ) : (
                   pageData.content.rows.map(row => (
