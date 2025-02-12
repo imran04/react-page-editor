@@ -9,9 +9,10 @@ interface RowProps {
   id: string;
   columns: any[];
   onBlockContentChange: (columnId: string, blockId: string, content: string) => void;
+  onAddColumn: (rowId: string) => void;
 }
 
-export function Row({ id, columns, onBlockContentChange }: RowProps) {
+export function Row({ id, columns, onBlockContentChange, onAddColumn }: RowProps) {
   const {
     attributes,
     listeners,
@@ -26,17 +27,16 @@ export function Row({ id, columns, onBlockContentChange }: RowProps) {
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (e.dataTransfer.types.includes('blockType')) {
-      e.preventDefault();
-    }
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     const blockType = e.dataTransfer.getData('blockType');
     if (blockType === 'columns') {
-      // Handle column drop here
-      console.log('Column dropped in row:', id);
+      onAddColumn(id);
     }
   };
 

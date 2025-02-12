@@ -114,6 +114,22 @@ export default function Editor() {
     });
   };
 
+  const handleAddRow = () => {
+    setPageData((prevData) => ({
+      ...prevData,
+      content: {
+        ...prevData.content,
+        rows: [
+          ...prevData.content.rows,
+          {
+            id: `row-${nanoid()}`,
+            columns: []
+          }
+        ]
+      }
+    }));
+  };
+
   return (
     <div className="flex h-screen bg-muted/10">
       {/* Sidebar */}
@@ -148,15 +164,31 @@ export default function Editor() {
                 items={pageData.content.rows.map(row => row.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {pageData.content.rows.map(row => (
-                  <Row
-                    key={row.id}
-                    id={row.id}
-                    columns={row.columns}
-                    onBlockContentChange={handleBlockContentChange}
-                    onAddColum={handleAddColumn} // Added prop for add column functionality
-                  />
-                ))}
+                {pageData.content.rows.length === 0 ? (
+                  <div 
+                    className="h-32 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const blockType = e.dataTransfer.getData('blockType');
+                      if (blockType === 'columns') {
+                        handleAddRow();
+                      }
+                    }}
+                  >
+                    <p className="text-muted-foreground">Drop columns here to create a new row</p>
+                  </div>
+                ) : (
+                  pageData.content.rows.map(row => (
+                    <Row
+                      key={row.id}
+                      id={row.id}
+                      columns={row.columns}
+                      onBlockContentChange={handleBlockContentChange}
+                      onAddColumn={handleAddColumn}
+                    />
+                  ))
+                )}
               </SortableContext>
             </DndContext>
           </div>
