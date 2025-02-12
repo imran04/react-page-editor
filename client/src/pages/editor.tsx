@@ -19,6 +19,7 @@ import { Sidebar } from '@/components/editor/sidebar';
 import { sampleTemplate } from '@/lib/sample-data';
 import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
+import { nanoid } from 'nanoid';
 
 export default function Editor() {
   const [pageData, setPageData] = useState(sampleTemplate.pages[0]);
@@ -78,6 +79,41 @@ export default function Editor() {
     });
   };
 
+  const handleAddColumn = (rowId: string) => {
+    setPageData((prevData) => {
+      const newRows = prevData.content.rows.map(row => {
+        if (row.id === rowId) {
+          const newColumn = {
+            id: `col-${nanoid()}`,
+            type: 'col-6',
+            content: [
+              {
+                id: `block-${nanoid()}`,
+                blocktype: 'text',
+                properties: [],
+                attributes: [],
+                innerHtmlOrText: '<p>New column content</p>'
+              }
+            ]
+          };
+          return {
+            ...row,
+            columns: [...row.columns, newColumn]
+          };
+        }
+        return row;
+      });
+
+      return {
+        ...prevData,
+        content: {
+          ...prevData.content,
+          rows: newRows
+        }
+      };
+    });
+  };
+
   return (
     <div className="flex h-screen bg-muted/10">
       {/* Sidebar */}
@@ -118,6 +154,7 @@ export default function Editor() {
                     id={row.id}
                     columns={row.columns}
                     onBlockContentChange={handleBlockContentChange}
+                    onAddColum={handleAddColumn} // Added prop for add column functionality
                   />
                 ))}
               </SortableContext>

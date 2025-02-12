@@ -25,6 +25,21 @@ export function Row({ id, columns, onBlockContentChange }: RowProps) {
     transition,
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes('blockType')) {
+      e.preventDefault();
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const blockType = e.dataTransfer.getData('blockType');
+    if (blockType === 'columns') {
+      // Handle column drop here
+      console.log('Column dropped in row:', id);
+    }
+  };
+
   return (
     <div ref={setNodeRef} style={style} className="mb-4">
       <Card className="p-4">
@@ -41,18 +56,28 @@ export function Row({ id, columns, onBlockContentChange }: RowProps) {
           items={columns.map(col => col.id)}
           strategy={horizontalListSortingStrategy}
         >
-          <div className="flex flex-wrap gap-4">
-            {columns.map(column => (
-              <Column
-                key={column.id}
-                id={column.id}
-                type={column.type}
-                content={column.content}
-                onBlockContentChange={(blockId, content) =>
-                  onBlockContentChange(column.id, blockId, content)
-                }
-              />
-            ))}
+          <div 
+            className="flex flex-wrap gap-4"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            {columns.length === 0 ? (
+              <div className="w-full h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
+                <p className="text-muted-foreground">Drop columns here</p>
+              </div>
+            ) : (
+              columns.map(column => (
+                <Column
+                  key={column.id}
+                  id={column.id}
+                  type={column.type}
+                  content={column.content}
+                  onBlockContentChange={(blockId, content) =>
+                    onBlockContentChange(column.id, blockId, content)
+                  }
+                />
+              ))
+            )}
           </div>
         </SortableContext>
       </Card>
