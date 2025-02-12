@@ -3,16 +3,28 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { CSS } from '@dnd-kit/utilities';
 import { Column } from './column';
 import { Card } from '@/components/ui/card';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface RowProps {
   id: string;
   columns: any[];
   onBlockContentChange: (columnId: string, blockId: string, content: string) => void;
   onAddColumn: (rowId: string) => void;
+  onRemoveBlock: (columnId: string, blockId: string) => void;
+  onRemoveColumn: (columnId: string) => void;
+  onRemoveRow: () => void;
 }
 
-export function Row({ id, columns, onBlockContentChange, onAddColumn }: RowProps) {
+export function Row({ 
+  id, 
+  columns, 
+  onBlockContentChange, 
+  onAddColumn,
+  onRemoveBlock,
+  onRemoveColumn,
+  onRemoveRow
+}: RowProps) {
   const {
     attributes,
     listeners,
@@ -43,7 +55,7 @@ export function Row({ id, columns, onBlockContentChange, onAddColumn }: RowProps
   return (
     <div ref={setNodeRef} style={style} className="mb-4">
       <Card className="p-4">
-        <div className="mb-2 flex justify-center">
+        <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
             {...attributes}
@@ -51,6 +63,14 @@ export function Row({ id, columns, onBlockContentChange, onAddColumn }: RowProps
           >
             <GripVertical className="w-4 h-4" />
           </button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onRemoveRow}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
         <SortableContext
           items={columns.map(col => col.id)}
@@ -75,6 +95,8 @@ export function Row({ id, columns, onBlockContentChange, onAddColumn }: RowProps
                   onBlockContentChange={(blockId, content) =>
                     onBlockContentChange(column.id, blockId, content)
                   }
+                  onRemoveBlock={(blockId) => onRemoveBlock(column.id, blockId)}
+                  onRemoveColumn={() => onRemoveColumn(column.id)}
                 />
               ))
             )}

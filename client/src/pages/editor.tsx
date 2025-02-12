@@ -130,6 +130,58 @@ export default function Editor() {
     }));
   };
 
+  const handleRemoveBlock = (columnId: string, blockId: string) => {
+    setPageData((prevData) => {
+      const newRows = prevData.content.rows.map(row => ({
+        ...row,
+        columns: row.columns.map(col => {
+          if (col.id === columnId) {
+            return {
+              ...col,
+              content: col.content.filter(block => block.id !== blockId)
+            };
+          }
+          return col;
+        }),
+      }));
+
+      return {
+        ...prevData,
+        content: {
+          ...prevData.content,
+          rows: newRows,
+        },
+      };
+    });
+  };
+
+  const handleRemoveColumn = (columnId: string) => {
+    setPageData((prevData) => {
+      const newRows = prevData.content.rows.map(row => ({
+        ...row,
+        columns: row.columns.filter(col => col.id !== columnId)
+      }));
+
+      return {
+        ...prevData,
+        content: {
+          ...prevData.content,
+          rows: newRows,
+        },
+      };
+    });
+  };
+
+  const handleRemoveRow = (rowId: string) => {
+    setPageData((prevData) => ({
+      ...prevData,
+      content: {
+        ...prevData.content,
+        rows: prevData.content.rows.filter(row => row.id !== rowId)
+      }
+    }));
+  };
+
   return (
     <div className="flex h-screen bg-muted/10">
       {/* Sidebar */}
@@ -186,6 +238,9 @@ export default function Editor() {
                       columns={row.columns}
                       onBlockContentChange={handleBlockContentChange}
                       onAddColumn={handleAddColumn}
+                      onRemoveBlock={handleRemoveBlock}
+                      onRemoveColumn={handleRemoveColumn}
+                      onRemoveRow={() => handleRemoveRow(row.id)}
                     />
                   ))
                 )}

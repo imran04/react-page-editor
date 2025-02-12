@@ -2,15 +2,17 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TextEditor } from './text-editor';
 import { Card } from '@/components/ui/card';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BlockProps {
   id: string;
   content: string;
   onContentChange: (content: string) => void;
+  onRemove: () => void;
 }
 
-export function Block({ id, content, onContentChange }: BlockProps) {
+export function Block({ id, content, onContentChange, onRemove }: BlockProps) {
   const {
     attributes,
     listeners,
@@ -41,6 +43,14 @@ export function Block({ id, content, onContentChange }: BlockProps) {
               onContentChange={onContentChange}
             />
           </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+            onClick={onRemove}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </Card>
     </div>
