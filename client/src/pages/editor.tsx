@@ -15,6 +15,7 @@ import {
 } from '@dnd-kit/sortable';
 import { Row } from '@/components/editor/row';
 import { JsonPreview } from '@/components/editor/json-preview';
+import { Sidebar } from '@/components/editor/sidebar';
 import { sampleTemplate } from '@/lib/sample-data';
 
 export default function Editor() {
@@ -75,33 +76,43 @@ export default function Editor() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">Page Editor</h1>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="space-y-6">
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={pageData.content.rows.map(row => row.id)}
-              strategy={verticalListSortingStrategy}
+    <div className="flex h-screen bg-muted/10">
+      {/* Sidebar */}
+      <div className="w-64 p-4 border-r bg-background">
+        <Sidebar />
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex">
+        {/* Editor Area */}
+        <div className="flex-1 overflow-auto p-8">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-3xl font-bold mb-8">Page Editor</h1>
+
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
             >
-              {pageData.content.rows.map(row => (
-                <Row
-                  key={row.id}
-                  id={row.id}
-                  columns={row.columns}
-                  onBlockContentChange={handleBlockContentChange}
-                />
-              ))}
-            </SortableContext>
-          </DndContext>
+              <SortableContext
+                items={pageData.content.rows.map(row => row.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {pageData.content.rows.map(row => (
+                  <Row
+                    key={row.id}
+                    id={row.id}
+                    columns={row.columns}
+                    onBlockContentChange={handleBlockContentChange}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
+          </div>
         </div>
 
-        <div className="lg:sticky lg:top-8">
+        {/* JSON Preview Panel */}
+        <div className="w-96 p-4 border-l bg-background overflow-auto">
           <JsonPreview data={pageData} />
         </div>
       </div>
