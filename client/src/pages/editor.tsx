@@ -17,9 +17,12 @@ import { Row } from '@/components/editor/row';
 import { JsonPreview } from '@/components/editor/json-preview';
 import { Sidebar } from '@/components/editor/sidebar';
 import { sampleTemplate } from '@/lib/sample-data';
+import { Button } from '@/components/ui/button';
+import { Code } from 'lucide-react';
 
 export default function Editor() {
   const [pageData, setPageData] = useState(sampleTemplate.pages[0]);
+  const [showJsonPreview, setShowJsonPreview] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -87,7 +90,18 @@ export default function Editor() {
         {/* Editor Area */}
         <div className="flex-1 overflow-auto p-8">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold mb-8">Page Editor</h1>
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold">Page Editor</h1>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowJsonPreview(!showJsonPreview)}
+                className="gap-2"
+              >
+                <Code className="h-4 w-4" />
+                {showJsonPreview ? 'Hide' : 'Show'} JSON
+              </Button>
+            </div>
 
             <DndContext
               sensors={sensors}
@@ -112,8 +126,14 @@ export default function Editor() {
         </div>
 
         {/* JSON Preview Panel */}
-        <div className="w-96 p-4 border-l bg-background overflow-auto">
-          <JsonPreview data={pageData} />
+        <div 
+          className={`w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
+            showJsonPreview ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-4">
+            <JsonPreview data={pageData} />
+          </div>
         </div>
       </div>
     </div>
