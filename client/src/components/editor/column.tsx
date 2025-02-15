@@ -13,6 +13,8 @@ interface ColumnProps {
   onBlockContentChange: (blockId: string, content: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onRemoveColumn: () => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
 export function Column({ 
@@ -21,7 +23,9 @@ export function Column({
   content, 
   onBlockContentChange, 
   onRemoveBlock,
-  onRemoveColumn 
+  onRemoveColumn,
+  isSelected = false,
+  onSelect
 }: ColumnProps) {
   const {
     attributes,
@@ -49,8 +53,16 @@ export function Column({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={type}>
-      <Card className="p-4">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={`${type} relative group`}
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect?.();
+      }}
+    >
+      <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
         <div className="mb-2 flex items-center justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
@@ -63,7 +75,10 @@ export function Column({
             variant="ghost"
             size="sm"
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={onRemoveColumn}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveColumn();
+            }}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -88,11 +103,16 @@ export function Column({
                 content={block.innerHtmlOrText}
                 onContentChange={(content) => onBlockContentChange(block.id, content)}
                 onRemove={() => onRemoveBlock(block.id)}
+                isSelected={isSelected}
+                onSelect={() => onSelect?.()}
               />
             ))
           )}
         </SortableContext>
       </Card>
+      {isSelected && (
+        <div className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none" />
+      )}
     </div>
   );
 }

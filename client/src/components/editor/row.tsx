@@ -14,6 +14,8 @@ interface RowProps {
   onRemoveBlock: (columnId: string, blockId: string) => void;
   onRemoveColumn: (columnId: string) => void;
   onRemoveRow: () => void;
+  isSelected: boolean;
+  onSelect: () => void;
 }
 
 export function Row({ 
@@ -23,7 +25,9 @@ export function Row({
   onAddColumn,
   onRemoveBlock,
   onRemoveColumn,
-  onRemoveRow
+  onRemoveRow,
+  isSelected,
+  onSelect
 }: RowProps) {
   const {
     attributes,
@@ -53,8 +57,16 @@ export function Row({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="mb-4">
-      <Card className="p-4">
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className="mb-4 relative group"
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
+    >
+      <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
         <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
@@ -67,7 +79,10 @@ export function Row({
             variant="ghost"
             size="sm"
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={onRemoveRow}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemoveRow();
+            }}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -97,12 +112,16 @@ export function Row({
                   }
                   onRemoveBlock={(blockId) => onRemoveBlock(column.id, blockId)}
                   onRemoveColumn={() => onRemoveColumn(column.id)}
+                  isSelected={isSelected} // Pass isSelected down to Column
                 />
               ))
             )}
           </div>
         </SortableContext>
       </Card>
+      {isSelected && (
+        <div className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none" />
+      )}
     </div>
   );
 }

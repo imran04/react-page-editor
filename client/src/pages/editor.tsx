@@ -21,9 +21,15 @@ import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
 import { nanoid } from 'nanoid';
 
+interface Selection {
+  type: 'row' | 'column' | 'block';
+  id: string;
+}
+
 export default function Editor() {
   const [pageData, setPageData] = useState(sampleTemplate.pages[0]);
   const [showJsonPreview, setShowJsonPreview] = useState(false);
+  const [selectedElement, setSelectedElement] = useState<Selection | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -86,7 +92,7 @@ export default function Editor() {
           const newColumn = {
             id: `col-${nanoid()}`,
             type: 'col-6',
-            content: [] // Remove default text block
+            content: []
           };
           return {
             ...row,
@@ -123,6 +129,7 @@ export default function Editor() {
   };
 
   const handleRemoveBlock = (columnId: string, blockId: string) => {
+    setSelectedElement(null);
     setPageData((prevData) => {
       const newRows = prevData.content.rows.map(row => ({
         ...row,
@@ -148,6 +155,7 @@ export default function Editor() {
   };
 
   const handleRemoveColumn = (columnId: string) => {
+    setSelectedElement(null);
     setPageData((prevData) => {
       const newRows = prevData.content.rows.map(row => ({
         ...row,
@@ -165,6 +173,7 @@ export default function Editor() {
   };
 
   const handleRemoveRow = (rowId: string) => {
+    setSelectedElement(null);
     setPageData((prevData) => ({
       ...prevData,
       content: {
@@ -172,6 +181,12 @@ export default function Editor() {
         rows: prevData.content.rows.filter(row => row.id !== rowId)
       }
     }));
+  };
+
+  const handleSelect = (type: 'row' | 'column' | 'block', id: string) => {
+    setSelectedElement(prev => 
+      prev?.id === id ? null : { type, id }
+    );
   };
 
   return (
@@ -242,6 +257,8 @@ export default function Editor() {
                       onRemoveBlock={handleRemoveBlock}
                       onRemoveColumn={handleRemoveColumn}
                       onRemoveRow={() => handleRemoveRow(row.id)}
+                      isSelected={selectedElement?.type === 'row' && selectedElement.id === row.id}
+                      onSelect={() => handleSelect('row', row.id)}
                     />
                   ))
                 )}
