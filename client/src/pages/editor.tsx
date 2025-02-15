@@ -318,7 +318,7 @@ export default function Editor() {
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Editor Area */}
-        <div className="flex-1 overflow-auto p-8">
+        <div className={`flex-1 overflow-auto p-8 ${selectedElement ? 'mr-80' : ''}`}>
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
               <h1 className="text-3xl font-bold">Page Editor</h1>
@@ -390,7 +390,11 @@ export default function Editor() {
         </div>
 
         {/* Properties Panel */}
-        <div className="w-80 border-l bg-background">
+        <div 
+          className={`fixed right-0 top-0 bottom-0 w-80 border-l bg-background transform transition-transform duration-200 ease-in-out ${
+            selectedElement ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
           <div className="p-4 h-full">
             <PropertiesPanel
               selectedElement={selectedElement}
