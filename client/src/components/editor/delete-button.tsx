@@ -11,7 +11,7 @@ export function DeleteButton({ onDelete, className = '' }: DeleteButtonProps) {
     <Button
       variant="ghost"
       size="sm"
-      className={`text-destructive hover:text-destructive hover:bg-destructive/10 ${className}`}
+      className={` hover:bg-destructive/10 ${className}`}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();

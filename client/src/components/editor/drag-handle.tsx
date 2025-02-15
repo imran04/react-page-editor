@@ -19,7 +19,7 @@ export function DragHandle({
       {...dragListeners}
       {...props}
     >
-      <DragIcon className="w-4 h-4" />
+      <img className="move-icon" src="/www/move.png" alt="Drag handle"/>
     </button>
   );
 }

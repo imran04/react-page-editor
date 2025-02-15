@@ -11,3 +11,24 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+.move-icon {
+ height: 20px;
+}
+
+.toolbar-draggable {
+  position: absolute;
+  top:-37px;
+  display: none;
+}
+.toolbar-draggable:hover {
+  display: block;
+}
+ .selected {
+  background-color: blueviolet;
+  color:#fff;
+  display: flex!important;
+}
+.rv:hover > .toolbar-draggable {
+  display: block!important;
+}

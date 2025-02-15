@@ -105,7 +105,7 @@ export function Column({
         className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}
         style={styles}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className={`mb-2 flex items-center justify-between toolbar-draggable ${isSelected ? 'selected' : ''}`}>
           <DragHandle dragListeners={listeners} />
           <DeleteButton onDelete={onRemoveColumn} />
         </div>

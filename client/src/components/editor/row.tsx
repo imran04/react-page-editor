@@ -5,6 +5,7 @@ import { Column } from './column';
 import { Card } from '@/components/ui/card';
 import { DragHandle } from './drag-handle';
 import { DeleteButton } from './delete-button';
+import React from 'react';
 
 interface Selection {
   type: 'row' | 'column' | 'block';
@@ -29,6 +30,7 @@ interface RowProps {
   onRemoveColumn: (columnId: string) => void;
   onRemoveRow: () => void;
   isSelected: boolean;
+  mouseOver: boolean;
   onSelect: () => void;
   onColumnSelect: (columnId: string) => void;
   onBlockSelect: (blockId: string) => void;
@@ -48,6 +50,7 @@ export function Row({
   onRemoveColumn,
   onRemoveRow,
   isSelected,
+
   onSelect,
   onColumnSelect,
   onBlockSelect,
@@ -66,9 +69,9 @@ export function Row({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
+    transition
   };
-
+  
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -88,6 +91,7 @@ export function Row({
     }
   };
 
+  const [mouseOver, setMouseOver] = React.useState(false);
   // Calculate total columns to ensure we don't exceed 12
   const totalColumns = columns.reduce((acc, col) => {
     const colSize = parseInt(col.type.replace('col-', ''));
@@ -98,18 +102,20 @@ export function Row({
     <div
       ref={setNodeRef}
       style={{ ...style, ...styles }}
-      className="mb-4 relative group"
+      className="mb-4 relative group rw"
       onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
+      e.stopPropagation();
+      onSelect();
       }}
+      onMouseEnter={() => setMouseOver(true)}
+      onMouseLeave={() => setMouseOver(false)}
       {...attributes}
       {...sortableAttributes}
     >
       <Card className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
-        <div className="mb-2 flex justify-between items-center">
+        <div className={`mb-2 flex justify-between items-center toolbar-draggable ${isSelected|| mouseOver ? 'selected' : ''}`}>
           <DragHandle dragListeners={listeners} />
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs ">
             {totalColumns}/12 columns used
           </div>
           <DeleteButton onDelete={onRemoveRow} />
