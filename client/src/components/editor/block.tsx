@@ -2,8 +2,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { TextEditor } from './text-editor';
 import { Card } from '@/components/ui/card';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DragIcon } from './drag-icon';
 
 interface BlockStyles {
   [key: string]: string;
@@ -70,7 +71,7 @@ export function Block({
             className="p-2 hover:bg-muted rounded cursor-move"
             {...listeners}
           >
-            <GripVertical className="w-4 h-4" />
+            <DragIcon className="w-4 h-4" />
           </button>
           <div className="flex-1">
             <TextEditor

@@ -3,8 +3,9 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities';
 import { Block } from './block';
 import { Card } from '@/components/ui/card';
-import { GripHorizontal, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DragIcon } from './drag-icon';
 
 interface ColumnStyles {
   [key: string]: string;
@@ -98,7 +99,7 @@ export function Column({
             {...dndAttributes}
             {...listeners}
           >
-            <GripHorizontal className="w-4 h-4" />
+            <DragIcon className="w-4 h-4" />
           </button>
           <Button
             variant="ghost"
