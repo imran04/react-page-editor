@@ -96,7 +96,6 @@ export function Row({
         <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
-            
           >
             <GripVertical className="w-4 h-4" />
           </button>
@@ -141,6 +140,8 @@ export function Row({
                   onSelect={() => onColumnSelect(column.id)}
                   onBlockSelect={onBlockSelect}
                   selectedElement={selectedElement}
+                  styles={column.styles || {}}
+                  attributes={column.attributes || {}}
                 />
               ))
             )}

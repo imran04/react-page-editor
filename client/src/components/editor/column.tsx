@@ -73,20 +73,24 @@ export function Column({
     // Handle block drop here
   };
 
+  // Combine tailwind classes from type prop
+  const columnClasses = type ? `${type}` : 'w-full';
+
   return (
     <div
       ref={setNodeRef}
-      style={{ ...style, ...styles }}
-      className={`${type} relative group`}
+      style={{ ...style }}
+      className={`${columnClasses} relative group`}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
       {...attributes}
-      {...dndAttributes}
-      {...listeners}
     >
-      <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
+      <Card 
+        className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}
+        style={styles}
+      >
         <div className="mb-2 flex items-center justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
@@ -111,32 +115,33 @@ export function Column({
           items={content.map(block => block.id)}
           strategy={verticalListSortingStrategy}
         >
-          {content.length === 0 ? (
-            <div
-              className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              <p className="text-muted-foreground">Drop blocks here</p>
-            </div>
-          ) : (
-            content.map(block => (
-              <Block
-                key={block.id}
-                id={block.id}
-                content={block.innerHtmlOrText}
-                onContentChange={(content) => onBlockContentChange(block.id, content)}
-                onRemove={() => onRemoveBlock(block.id)}
-                isSelected={selectedElement?.type === 'block' && selectedElement.id === block.id}
-                onSelect={() => onBlockSelect(block.id)}
-              />
-            ))
-          )}
+          <div className="space-y-4">
+            {content.length === 0 ? (
+              <div
+                className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
+                <p className="text-muted-foreground">Drop blocks here</p>
+              </div>
+            ) : (
+              content.map(block => (
+                <Block
+                  key={block.id}
+                  id={block.id}
+                  content={block.innerHtmlOrText}
+                  onContentChange={(content) => onBlockContentChange(block.id, content)}
+                  onRemove={() => onRemoveBlock(block.id)}
+                  isSelected={selectedElement?.type === 'block' && selectedElement.id === block.id}
+                  onSelect={() => onBlockSelect(block.id)}
+                  styles={block.styles || {}}
+                  attributes={block.attributes || {}}
+                />
+              ))
+            )}
+          </div>
         </SortableContext>
       </Card>
-      {isSelected && (
-        <div className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none" />
-      )}
     </div>
   );
 }

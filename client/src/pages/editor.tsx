@@ -90,11 +90,23 @@ export default function Editor() {
     setPageData((prevData) => {
       const newRows = prevData.content.rows.map(row => {
         if (row.id === rowId) {
+          const columnCount = row.columns.length;
+          let columnType = 'col-6'; 
+
+          if (columnCount === 0) {
+            columnType = 'col-12'; 
+          } else if (columnCount === 1) {
+            row.columns[0].type = 'col-6';
+          }
+
           const newColumn = {
             id: `col-${nanoid()}`,
-            type: 'col-6',
+            type: columnType,
+            styles: {},
+            attributes: {},
             content: []
           };
+
           return {
             ...row,
             columns: [...row.columns, newColumn]
@@ -122,6 +134,8 @@ export default function Editor() {
           ...prevData.content.rows,
           {
             id: `row-${nanoid()}`,
+            styles: {},
+            attributes: {},
             columns: []
           }
         ]
@@ -185,9 +199,12 @@ export default function Editor() {
   };
 
   const handleSelect = (type: 'row' | 'column' | 'block', id: string) => {
-    setSelectedElement(prev =>
-      prev?.id === id && prev.type === type ? null : { type, id }
-    );
+    setSelectedElement(prev => {
+      if (prev?.id === id && prev.type === type) {
+        return null;
+      }
+      return { type, id };
+    });
   };
 
   const handleUpdateStyles = (styles: Record<string, string>) => {
