@@ -23,6 +23,7 @@ interface RowProps {
   id: string;
   columns: any[];
   onBlockContentChange: (columnId: string, blockId: string, content: string) => void;
+  onAddBlock: (columnId: string, blockType: string) => void;
   onAddColumn: (rowId: string) => void;
   onRemoveBlock: (columnId: string, blockId: string) => void;
   onRemoveColumn: (columnId: string) => void;
@@ -32,15 +33,16 @@ interface RowProps {
   onColumnSelect: (columnId: string) => void;
   onBlockSelect: (blockId: string) => void;
   selectedElement: Selection | null;
-  styles?: RowStyles;
-  attributes?: RowAttributes;
+  styles?: Record<string, string>;
+  attributes?: Record<string, string>;
   showBorders: boolean;
 }
 
-export function Row({ 
-  id, 
-  columns, 
-  onBlockContentChange, 
+export function Row({
+  id,
+  columns,
+  onBlockContentChange,
+  onAddBlock,
   onAddColumn,
   onRemoveBlock,
   onRemoveColumn,
@@ -93,9 +95,9 @@ export function Row({
   }, 0);
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={{ ...style, ...styles }} 
+    <div
+      ref={setNodeRef}
+      style={{ ...style, ...styles }}
       className="mb-4 relative group"
       onClick={(e) => {
         e.stopPropagation();
@@ -116,27 +118,26 @@ export function Row({
           items={columns.map(col => col.id)}
           strategy={horizontalListSortingStrategy}
         >
-          <div 
-            className="flex flex-wrap -mx-2" 
+          <div
+            className="flex flex-wrap -mx-2"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {columns.length === 0 ? (
-              <div className="w-full px-2"> 
+              <div className="w-full px-2">
                 <div className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
                   <p className="text-muted-foreground">Drop columns here</p>
                 </div>
               </div>
             ) : (
               columns.map(column => (
-                <div key={column.id} className="px-2"> 
+                <div key={column.id} className="px-2">
                   <Column
                     id={column.id}
                     type={column.type}
                     content={column.content}
-                    onBlockContentChange={(blockId, content) =>
-                      onBlockContentChange(column.id, blockId, content)
-                    }
+                    onBlockContentChange={onBlockContentChange}
+                    onAddBlock={onAddBlock}
                     onRemoveBlock={(blockId) => onRemoveBlock(column.id, blockId)}
                     onRemoveColumn={() => onRemoveColumn(column.id)}
                     isSelected={selectedElement?.type === 'column' && selectedElement.id === column.id}

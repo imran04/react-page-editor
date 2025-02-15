@@ -7,8 +7,6 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
-  DragStartEvent,
-  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -72,35 +70,34 @@ export default function Editor() {
         ...row,
         columns: row.columns.map(col => {
           if (col.id === columnId) {
-            // Check if the block exists
-            const existingBlockIndex = col.content.findIndex(block => block.id === blockId);
+            const block = col.content.find(b => b.id === blockId);
 
-            if (existingBlockIndex === -1) {
-              // If block doesn't exist, add it as a new block
+            if (!block) {
+              // If block doesn't exist, create a new one
               return {
                 ...col,
                 content: [
                   ...col.content,
                   {
                     id: blockId,
-                    blocktype: 'text',
+                    blocktype: content.startsWith('<') ? 'text' : 'image',
                     styles: {},
                     attributes: {},
                     innerHtmlOrText: content
                   }
                 ]
               };
-            } else {
-              // If block exists, update its content
-              return {
-                ...col,
-                content: col.content.map(block =>
-                  block.id === blockId
-                    ? { ...block, innerHtmlOrText: content }
-                    : block
-                )
-              };
             }
+
+            // If block exists, update its content
+            return {
+              ...col,
+              content: col.content.map(block =>
+                block.id === blockId
+                  ? { ...block, innerHtmlOrText: content }
+                  : block
+              )
+            };
           }
           return col;
         })
@@ -114,6 +111,51 @@ export default function Editor() {
         }
       };
     });
+  };
+
+  const handleAddBlock = (columnId: string, blockType: string) => {
+    const newBlockId = `block-${nanoid()}`;
+    let defaultContent = '';
+
+    if (blockType === 'text') {
+      defaultContent = '<p>New text block</p>';
+    } else if (blockType === 'image') {
+      defaultContent = '';
+    }
+
+    setPageData((prevData) => {
+      const newRows = prevData.content.rows.map(row => ({
+        ...row,
+        columns: row.columns.map(col => {
+          if (col.id === columnId) {
+            return {
+              ...col,
+              content: [
+                ...col.content,
+                {
+                  id: newBlockId,
+                  blocktype: blockType,
+                  styles: {},
+                  attributes: {},
+                  innerHtmlOrText: defaultContent
+                }
+              ]
+            };
+          }
+          return col;
+        })
+      }));
+
+      return {
+        ...prevData,
+        content: {
+          ...prevData.content,
+          rows: newRows
+        }
+      };
+    });
+
+    return newBlockId;
   };
 
   const handleAddColumn = (rowId: string) => {
@@ -413,43 +455,26 @@ export default function Editor() {
                 items={pageData.content.rows.map(row => row.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {pageData.content.rows.length === 0 ? (
-                  <div
-                    className="h-32 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const layoutData = e.dataTransfer.getData('layout');
-                      if (layoutData) {
-                        const layout = JSON.parse(layoutData);
-                        handleAddRow(layout.columns);
-                      }
-                    }}
-                  >
-                    <p className="text-muted-foreground">Drop a layout here or click "Add Row" to create a new row</p>
-                  </div>
-                ) : (
-                  pageData.content.rows.map(row => (
-                    <Row
-                      key={row.id}
-                      id={row.id}
-                      columns={row.columns}
-                      onBlockContentChange={handleBlockContentChange}
-                      onAddColumn={handleAddColumn}
-                      onRemoveBlock={handleRemoveBlock}
-                      onRemoveColumn={handleRemoveColumn}
-                      onRemoveRow={() => handleRemoveRow(row.id)}
-                      isSelected={selectedElement?.type === 'row' && selectedElement.id === row.id}
-                      onSelect={() => handleSelect('row', row.id)}
-                      onColumnSelect={(columnId) => handleSelect('column', columnId)}
-                      onBlockSelect={(blockId) => handleSelect('block', blockId)}
-                      selectedElement={selectedElement}
-                      styles={row.styles}
-                      attributes={row.attributes}
-                      showBorders={showBorders || isDragging}
-                    />
-                  ))
-                )}
+                {pageData.content.rows.map(row => (
+                  <Row
+                    key={row.id}
+                    id={row.id}
+                    columns={row.columns}
+                    onBlockContentChange={handleBlockContentChange}
+                    onAddBlock={handleAddBlock}
+                    onRemoveBlock={handleRemoveBlock}
+                    onRemoveColumn={handleRemoveColumn}
+                    onRemoveRow={() => handleRemoveRow(row.id)}
+                    isSelected={selectedElement?.type === 'row' && selectedElement.id === row.id}
+                    onSelect={() => handleSelect('row', row.id)}
+                    onColumnSelect={(columnId) => handleSelect('column', columnId)}
+                    onBlockSelect={(blockId) => handleSelect('block', blockId)}
+                    selectedElement={selectedElement}
+                    styles={row.styles}
+                    attributes={row.attributes}
+                    showBorders={showBorders || isDragging}
+                  />
+                ))}
               </SortableContext>
             </DndContext>
           </div>
