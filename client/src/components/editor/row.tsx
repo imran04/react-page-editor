@@ -6,6 +6,11 @@ import { Card } from '@/components/ui/card';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface Selection {
+  type: 'row' | 'column' | 'block';
+  id: string;
+}
+
 interface RowProps {
   id: string;
   columns: any[];
@@ -16,6 +21,9 @@ interface RowProps {
   onRemoveRow: () => void;
   isSelected: boolean;
   onSelect: () => void;
+  onColumnSelect: (columnId: string) => void;
+  onBlockSelect: (blockId: string) => void;
+  selectedElement: Selection | null;
 }
 
 export function Row({ 
@@ -27,7 +35,10 @@ export function Row({
   onRemoveColumn,
   onRemoveRow,
   isSelected,
-  onSelect
+  onSelect,
+  onColumnSelect,
+  onBlockSelect,
+  selectedElement
 }: RowProps) {
   const {
     attributes,
@@ -112,7 +123,10 @@ export function Row({
                   }
                   onRemoveBlock={(blockId) => onRemoveBlock(column.id, blockId)}
                   onRemoveColumn={() => onRemoveColumn(column.id)}
-                  isSelected={isSelected} // Pass isSelected down to Column
+                  isSelected={selectedElement?.type === 'column' && selectedElement.id === column.id}
+                  onSelect={() => onColumnSelect(column.id)}
+                  onBlockSelect={onBlockSelect}
+                  selectedElement={selectedElement}
                 />
               ))
             )}

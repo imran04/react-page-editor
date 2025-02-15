@@ -259,6 +259,9 @@ export default function Editor() {
                       onRemoveRow={() => handleRemoveRow(row.id)}
                       isSelected={selectedElement?.type === 'row' && selectedElement.id === row.id}
                       onSelect={() => handleSelect('row', row.id)}
+                      onColumnSelect={(columnId) => handleSelect('column', columnId)}
+                      onBlockSelect={(blockId) => handleSelect('block', blockId)}
+                      selectedElement={selectedElement}
                     />
                   ))
                 )}

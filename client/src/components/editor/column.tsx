@@ -6,6 +6,11 @@ import { Card } from '@/components/ui/card';
 import { GripHorizontal, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface Selection {
+  type: 'row' | 'column' | 'block';
+  id: string;
+}
+
 interface ColumnProps {
   id: string;
   type: string;
@@ -13,8 +18,10 @@ interface ColumnProps {
   onBlockContentChange: (blockId: string, content: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onRemoveColumn: () => void;
-  isSelected?: boolean;
-  onSelect?: () => void;
+  isSelected: boolean;
+  onSelect: () => void;
+  onBlockSelect: (blockId: string) => void;
+  selectedElement: Selection | null;
 }
 
 export function Column({ 
@@ -24,8 +31,10 @@ export function Column({
   onBlockContentChange, 
   onRemoveBlock,
   onRemoveColumn,
-  isSelected = false,
-  onSelect
+  isSelected,
+  onSelect,
+  onBlockSelect,
+  selectedElement
 }: ColumnProps) {
   const {
     attributes,
@@ -59,7 +68,7 @@ export function Column({
       className={`${type} relative group`}
       onClick={(e) => {
         e.stopPropagation();
-        onSelect?.();
+        onSelect();
       }}
     >
       <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
@@ -103,8 +112,8 @@ export function Column({
                 content={block.innerHtmlOrText}
                 onContentChange={(content) => onBlockContentChange(block.id, content)}
                 onRemove={() => onRemoveBlock(block.id)}
-                isSelected={isSelected}
-                onSelect={() => onSelect?.()}
+                isSelected={selectedElement?.type === 'block' && selectedElement.id === block.id}
+                onSelect={() => onBlockSelect(block.id)}
               />
             ))
           )}
