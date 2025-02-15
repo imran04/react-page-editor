@@ -83,6 +83,7 @@ export function Block({
             size="sm"
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onRemove();
             }}

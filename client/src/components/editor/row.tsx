@@ -92,12 +92,12 @@ export function Row({
       }}
       {...attributes}
       {...sortableAttributes}
-      {...listeners}
     >
       <Card className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
         <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
+            {...listeners}
           >
             <GripVertical className="w-4 h-4" />
           </button>
@@ -106,6 +106,7 @@ export function Row({
             size="sm"
             className="text-destructive hover:text-destructive hover:bg-destructive/10"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onRemoveRow();
             }}
@@ -151,9 +152,6 @@ export function Row({
           </div>
         </SortableContext>
       </Card>
-      {isSelected && (
-        <div className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none" />
-      )}
     </div>
   );
 }
