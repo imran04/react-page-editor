@@ -6,6 +6,14 @@ import { Card } from '@/components/ui/card';
 import { GripHorizontal, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface ColumnStyles {
+  [key: string]: string;
+}
+
+interface ColumnAttributes {
+  [key: string]: string;
+}
+
 interface Selection {
   type: 'row' | 'column' | 'block';
   id: string;
@@ -22,22 +30,26 @@ interface ColumnProps {
   onSelect: () => void;
   onBlockSelect: (blockId: string) => void;
   selectedElement: Selection | null;
+  styles?: ColumnStyles;
+  attributes?: ColumnAttributes;
 }
 
-export function Column({ 
-  id, 
-  type, 
-  content, 
-  onBlockContentChange, 
+export function Column({
+  id,
+  type,
+  content,
+  onBlockContentChange,
   onRemoveBlock,
   onRemoveColumn,
   isSelected,
   onSelect,
   onBlockSelect,
-  selectedElement
+  selectedElement,
+  styles = {},
+  attributes = {}
 }: ColumnProps) {
   const {
-    attributes,
+    attributes: dndAttributes,
     listeners,
     setNodeRef,
     transform,
@@ -62,20 +74,23 @@ export function Column({
   };
 
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style} 
+    <div
+      ref={setNodeRef}
+      style={{ ...style, ...styles }}
       className={`${type} relative group`}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
+      {...attributes}
+      {...dndAttributes}
+      {...listeners}
     >
       <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
         <div className="mb-2 flex items-center justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
-            {...attributes}
+            {...dndAttributes}
             {...listeners}
           >
             <GripHorizontal className="w-4 h-4" />
@@ -97,7 +112,7 @@ export function Column({
           strategy={verticalListSortingStrategy}
         >
           {content.length === 0 ? (
-            <div 
+            <div
               className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
               onDragOver={handleDragOver}
               onDrop={handleDrop}

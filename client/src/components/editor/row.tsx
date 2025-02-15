@@ -11,6 +11,14 @@ interface Selection {
   id: string;
 }
 
+interface RowStyles {
+  [key: string]: string;
+}
+
+interface RowAttributes {
+  [key: string]: string;
+}
+
 interface RowProps {
   id: string;
   columns: any[];
@@ -24,6 +32,8 @@ interface RowProps {
   onColumnSelect: (columnId: string) => void;
   onBlockSelect: (blockId: string) => void;
   selectedElement: Selection | null;
+  styles?: RowStyles;
+  attributes?: RowAttributes;
 }
 
 export function Row({ 
@@ -38,10 +48,12 @@ export function Row({
   onSelect,
   onColumnSelect,
   onBlockSelect,
-  selectedElement
+  selectedElement,
+  styles = {},
+  attributes = {}
 }: RowProps) {
   const {
-    attributes,
+    attributes: sortableAttributes,
     listeners,
     setNodeRef,
     transform,
@@ -70,19 +82,21 @@ export function Row({
   return (
     <div 
       ref={setNodeRef} 
-      style={style} 
+      style={{ ...style, ...styles }} 
       className="mb-4 relative group"
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
+      {...attributes}
+      {...sortableAttributes}
+      {...listeners}
     >
       <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
         <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
-            {...attributes}
-            {...listeners}
+            
           >
             <GripVertical className="w-4 h-4" />
           </button>

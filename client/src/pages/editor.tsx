@@ -20,6 +20,7 @@ import { sampleTemplate } from '@/lib/sample-data';
 import { Button } from '@/components/ui/button';
 import { Code } from 'lucide-react';
 import { nanoid } from 'nanoid';
+import { PropertiesPanel } from '@/components/editor/properties-panel';
 
 interface Selection {
   type: 'row' | 'column' | 'block';
@@ -184,9 +185,127 @@ export default function Editor() {
   };
 
   const handleSelect = (type: 'row' | 'column' | 'block', id: string) => {
-    setSelectedElement(prev => 
+    setSelectedElement(prev =>
       prev?.id === id ? null : { type, id }
     );
+  };
+
+  const handleUpdateStyles = (styles: Record<string, string>) => {
+    if (!selectedElement) return;
+
+    setPageData((prevData) => {
+      if (selectedElement.type === 'row') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row =>
+              row.id === selectedElement.id
+                ? { ...row, styles: { ...row.styles, ...styles } }
+                : row
+            )
+          }
+        };
+      }
+
+      if (selectedElement.type === 'column') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row => ({
+              ...row,
+              columns: row.columns.map(col =>
+                col.id === selectedElement.id
+                  ? { ...col, styles: { ...col.styles, ...styles } }
+                  : col
+              )
+            }))
+          }
+        };
+      }
+
+      if (selectedElement.type === 'block') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row => ({
+              ...row,
+              columns: row.columns.map(col => ({
+                ...col,
+                content: col.content.map(block =>
+                  block.id === selectedElement.id
+                    ? { ...block, styles: { ...block.styles, ...styles } }
+                    : block
+                )
+              }))
+            }))
+          }
+        };
+      }
+
+      return prevData;
+    });
+  };
+
+  const handleUpdateAttributes = (attributes: Record<string, string>) => {
+    if (!selectedElement) return;
+
+    setPageData((prevData) => {
+      if (selectedElement.type === 'row') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row =>
+              row.id === selectedElement.id
+                ? { ...row, attributes: { ...row.attributes, ...attributes } }
+                : row
+            )
+          }
+        };
+      }
+
+      if (selectedElement.type === 'column') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row => ({
+              ...row,
+              columns: row.columns.map(col =>
+                col.id === selectedElement.id
+                  ? { ...col, attributes: { ...col.attributes, ...attributes } }
+                  : col
+              )
+            }))
+          }
+        };
+      }
+
+      if (selectedElement.type === 'block') {
+        return {
+          ...prevData,
+          content: {
+            ...prevData.content,
+            rows: prevData.content.rows.map(row => ({
+              ...row,
+              columns: row.columns.map(col => ({
+                ...col,
+                content: col.content.map(block =>
+                  block.id === selectedElement.id
+                    ? { ...block, attributes: { ...block.attributes, ...attributes } }
+                    : block
+                )
+              }))
+            }))
+          }
+        };
+      }
+
+      return prevData;
+    });
   };
 
   return (
@@ -233,7 +352,7 @@ export default function Editor() {
                 strategy={verticalListSortingStrategy}
               >
                 {pageData.content.rows.length === 0 ? (
-                  <div 
+                  <div
                     className="h-32 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
@@ -270,8 +389,19 @@ export default function Editor() {
           </div>
         </div>
 
+        {/* Properties Panel */}
+        <div className="w-80 border-l bg-background">
+          <div className="p-4 h-full">
+            <PropertiesPanel
+              selectedElement={selectedElement}
+              onUpdateStyles={handleUpdateStyles}
+              onUpdateAttributes={handleUpdateAttributes}
+            />
+          </div>
+        </div>
+
         {/* JSON Preview Panel */}
-        <div 
+        <div
           className={`w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
             showJsonPreview ? 'translate-x-0' : 'translate-x-full'
           }`}
