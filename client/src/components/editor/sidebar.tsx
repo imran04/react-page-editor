@@ -25,7 +25,7 @@ const contentBlocks: BlockTemplate[] = [
   {
     type: 'image',
     icon: <Image className="h-4 w-4" />,
-    label: 'Image'
+    label: 'Image Block'
   }
 ];
 
@@ -96,6 +96,10 @@ export function Sidebar() {
     event.dataTransfer.setData('layout', JSON.stringify(layout));
   };
 
+  const onBlockDragStart = (event: React.DragEvent, blockType: string) => {
+    event.dataTransfer.setData('blockType', blockType);
+  };
+
   return (
     <Card className="p-4 h-full">
       <h2 className="font-semibold mb-4">Content Blocks</h2>
@@ -131,9 +135,7 @@ export function Sidebar() {
               variant="outline"
               className="w-full justify-start gap-2"
               draggable
-              onDragStart={(e) => {
-                e.dataTransfer.setData('blockType', block.type);
-              }}
+              onDragStart={(e) => onBlockDragStart(e, block.type)}
             >
               {block.icon}
               {block.label}

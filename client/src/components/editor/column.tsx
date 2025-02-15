@@ -7,6 +7,14 @@ import { DeleteButton } from './delete-button';
 import { nanoid } from 'nanoid';
 import { getBlockComponent } from './blocks/block-registry';
 
+interface BlockContent {
+  id: string;
+  blocktype: string;
+  styles: Record<string, string>;
+  attributes: Record<string, string>;
+  innerHtmlOrText: string;
+}
+
 interface ColumnStyles {
   [key: string]: string;
 }
@@ -23,7 +31,7 @@ interface Selection {
 interface ColumnProps {
   id: string;
   type: string;
-  content: any[];
+  content: BlockContent[];
   onBlockContentChange: (blockId: string, content: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onRemoveColumn: () => void;
@@ -52,7 +60,7 @@ export function Column({
   showBorders,
 }: ColumnProps) {
   const {
-    attributes: dndAttributes,
+    attributes: dragAttributes,
     listeners,
     setNodeRef,
     transform,
@@ -86,7 +94,9 @@ export function Column({
       const newBlockId = `block-${nanoid()}`;
       // Set default content based on block type
       const defaultContent = blockType === 'text' ? '<p>New text block</p>' : '';
-      const newBlock = {
+
+      // Create the new block
+      const newBlock: BlockContent = {
         id: newBlockId,
         blocktype: blockType,
         styles: {},
@@ -94,8 +104,10 @@ export function Column({
         innerHtmlOrText: defaultContent
       };
 
-      // Update content array with the new block
+      // Trigger content update
       onBlockContentChange(newBlockId, defaultContent);
+
+      // Add the new block to content array
       content.push(newBlock);
     }
   };
@@ -112,16 +124,14 @@ export function Column({
         onSelect();
       }}
       {...attributes}
-      {...dndAttributes}
+      {...dragAttributes}
     >
       <Card
         className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}
         style={styles}
       >
         <div className="mb-2 flex items-center justify-between">
-          <DragHandle 
-            dragListeners={listeners}
-          />
+          <DragHandle dragListeners={listeners} />
           <DeleteButton onDelete={onRemoveColumn} />
         </div>
         <SortableContext
@@ -135,9 +145,7 @@ export function Column({
             onDrop={handleDrop}
           >
             {content.length === 0 ? (
-              <div
-                className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center transition-colors duration-200"
-              >
+              <div className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center transition-colors duration-200">
                 <p className="text-muted-foreground">Drop blocks here</p>
               </div>
             ) : (
