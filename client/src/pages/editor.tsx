@@ -186,7 +186,7 @@ export default function Editor() {
 
   const handleSelect = (type: 'row' | 'column' | 'block', id: string) => {
     setSelectedElement(prev =>
-      prev?.id === id ? null : { type, id }
+      prev?.id === id && prev.type === type ? null : { type, id }
     );
   };
 
@@ -201,7 +201,7 @@ export default function Editor() {
             ...prevData.content,
             rows: prevData.content.rows.map(row =>
               row.id === selectedElement.id
-                ? { ...row, styles: { ...row.styles, ...styles } }
+                ? { ...row, styles: { ...(row.styles || {}), ...styles } }
                 : row
             )
           }
@@ -217,7 +217,7 @@ export default function Editor() {
               ...row,
               columns: row.columns.map(col =>
                 col.id === selectedElement.id
-                  ? { ...col, styles: { ...col.styles, ...styles } }
+                  ? { ...col, styles: { ...(col.styles || {}), ...styles } }
                   : col
               )
             }))
@@ -236,7 +236,7 @@ export default function Editor() {
                 ...col,
                 content: col.content.map(block =>
                   block.id === selectedElement.id
-                    ? { ...block, styles: { ...block.styles, ...styles } }
+                    ? { ...block, styles: { ...(block.styles || {}), ...styles } }
                     : block
                 )
               }))
@@ -260,7 +260,7 @@ export default function Editor() {
             ...prevData.content,
             rows: prevData.content.rows.map(row =>
               row.id === selectedElement.id
-                ? { ...row, attributes: { ...row.attributes, ...attributes } }
+                ? { ...row, attributes: { ...(row.attributes || {}), ...attributes } }
                 : row
             )
           }
@@ -276,7 +276,7 @@ export default function Editor() {
               ...row,
               columns: row.columns.map(col =>
                 col.id === selectedElement.id
-                  ? { ...col, attributes: { ...col.attributes, ...attributes } }
+                  ? { ...col, attributes: { ...(col.attributes || {}), ...attributes } }
                   : col
               )
             }))
@@ -295,7 +295,7 @@ export default function Editor() {
                 ...col,
                 content: col.content.map(block =>
                   block.id === selectedElement.id
-                    ? { ...block, attributes: { ...block.attributes, ...attributes } }
+                    ? { ...block, attributes: { ...(block.attributes || {}), ...attributes } }
                     : block
                 )
               }))
@@ -381,6 +381,8 @@ export default function Editor() {
                       onColumnSelect={(columnId) => handleSelect('column', columnId)}
                       onBlockSelect={(blockId) => handleSelect('block', blockId)}
                       selectedElement={selectedElement}
+                      styles={row.styles}
+                      attributes={row.attributes}
                     />
                   ))
                 )}
@@ -406,7 +408,7 @@ export default function Editor() {
 
         {/* JSON Preview Panel */}
         <div
-          className={`w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
+          className={`fixed right-0 top-0 bottom-0 w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
             showJsonPreview ? 'translate-x-0' : 'translate-x-full'
           }`}
         >

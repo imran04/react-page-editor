@@ -10,20 +10,20 @@ export const sampleTemplate = {
         rows: [
           {
             id: "row-1",
+            styles: {},
+            attributes: {},
             columns: [
               {
                 id: "col-1",
                 type: "col-12",
+                styles: {},
+                attributes: {},
                 content: [
                   {
                     id: "block-1",
                     blocktype: "text",
-                    properties: [
-                      { name: "fontSize", value: "24px" }
-                    ],
-                    attributes: [
-                      { name: "class", value: "font-bold" }
-                    ],
+                    styles: {},
+                    attributes: {},
                     innerHtmlOrText: "<h1>Welcome to our page editor</h1>"
                   }
                 ]
@@ -32,16 +32,20 @@ export const sampleTemplate = {
           },
           {
             id: "row-2",
+            styles: {},
+            attributes: {},
             columns: [
               {
                 id: "col-2",
                 type: "col-6",
+                styles: {},
+                attributes: {},
                 content: [
                   {
                     id: "block-2",
                     blocktype: "text",
-                    properties: [],
-                    attributes: [],
+                    styles: {},
+                    attributes: {},
                     innerHtmlOrText: "<p>This is the left column content.</p>"
                   }
                 ]
@@ -49,12 +53,14 @@ export const sampleTemplate = {
               {
                 id: "col-3",
                 type: "col-6",
+                styles: {},
+                attributes: {},
                 content: [
                   {
                     id: "block-3",
                     blocktype: "text",
-                    properties: [],
-                    attributes: [],
+                    styles: {},
+                    attributes: {},
                     innerHtmlOrText: "<p>This is the right column content.</p>"
                   }
                 ]
