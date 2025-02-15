@@ -55,7 +55,7 @@ export function BaseBlock({
     <div 
       ref={setNodeRef} 
       style={{ ...style, ...styles }} 
-      className="mb-4 relative"
+      className="mb-4 relative block-container"
       onClick={handleClick}
       {...attributes}
       {...dragAttributes}
@@ -63,7 +63,7 @@ export function BaseBlock({
       <Card className={`p-2 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}>
         <div className="flex items-start gap-2">
           <DragHandle dragListeners={listeners} />
-          <div className="flex-1">
+          <div className="flex-1 block-content">
             {children}
           </div>
           <DeleteButton onDelete={onRemove} />

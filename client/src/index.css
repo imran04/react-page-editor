@@ -24,11 +24,35 @@
 .toolbar-draggable:hover {
   display: block;
 }
- .selected {
+.selected {
   background-color: blueviolet;
   color:#fff;
   display: flex!important;
 }
 .rv:hover > .toolbar-draggable {
   display: block!important;
+}
+
+/* Block specific styles */
+.block-container {
+  position: relative;
+}
+
+.block-container:hover .toolbar-draggable {
+  display: flex;
+}
+
+.block-content {
+  min-height: 40px;
+}
+
+.block-container .toolbar-draggable {
+  top: -35px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background: white;
+  border-radius: 4px;
+  padding: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
