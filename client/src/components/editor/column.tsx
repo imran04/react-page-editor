@@ -83,17 +83,12 @@ export function Column({
 
     const blockType = e.dataTransfer.getData('blockType');
     if (blockType) {
-      const newBlock = {
-        id: `block-${nanoid()}`,
-        blocktype: blockType,
-        styles: {},
-        attributes: {},
-        innerHtmlOrText: blockType === 'text' ? '<p>New text block</p>' : ''
-      };
+      // Create new block with default content
+      const newBlockId = `block-${nanoid()}`;
+      const defaultContent = blockType === 'text' ? '<p>New text block</p>' : '';
 
-      // Update content array with the new block
-      const updatedContent = [...content, newBlock];
-      onBlockContentChange(newBlock.id, newBlock.innerHtmlOrText);
+      // Update the content through the parent component
+      onBlockContentChange(newBlockId, defaultContent);
     }
   };
 

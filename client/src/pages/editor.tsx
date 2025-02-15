@@ -72,25 +72,46 @@ export default function Editor() {
         ...row,
         columns: row.columns.map(col => {
           if (col.id === columnId) {
-            return {
-              ...col,
-              content: col.content.map(block =>
-                block.id === blockId
-                  ? { ...block, innerHtmlOrText: content }
-                  : block
-              ),
-            };
+            // Check if the block exists
+            const existingBlockIndex = col.content.findIndex(block => block.id === blockId);
+
+            if (existingBlockIndex === -1) {
+              // If block doesn't exist, add it as a new block
+              return {
+                ...col,
+                content: [
+                  ...col.content,
+                  {
+                    id: blockId,
+                    blocktype: 'text',
+                    styles: {},
+                    attributes: {},
+                    innerHtmlOrText: content
+                  }
+                ]
+              };
+            } else {
+              // If block exists, update its content
+              return {
+                ...col,
+                content: col.content.map(block =>
+                  block.id === blockId
+                    ? { ...block, innerHtmlOrText: content }
+                    : block
+                )
+              };
+            }
           }
           return col;
-        }),
+        })
       }));
 
       return {
         ...prevData,
         content: {
           ...prevData.content,
-          rows: newRows,
-        },
+          rows: newRows
+        }
       };
     });
   };
