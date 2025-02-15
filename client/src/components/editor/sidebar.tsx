@@ -13,6 +13,7 @@ interface ColumnLayout {
   type: string;
   label: string;
   columns: string[];
+  description?: string;
 }
 
 const contentBlocks: BlockTemplate[] = [
@@ -29,40 +30,64 @@ const contentBlocks: BlockTemplate[] = [
 ];
 
 const columnLayouts: ColumnLayout[] = [
+  // Full width layouts
   {
-    type: 'single',
+    type: 'full-width',
     label: 'Full Width',
-    columns: ['col-12']
+    columns: ['col-12'],
+    description: 'Single column (12/12)'
   },
+  // Two column layouts
   {
     type: 'two-equal',
-    label: 'Two Columns (50/50)',
-    columns: ['col-6', 'col-6']
+    label: 'Two Equal Columns',
+    columns: ['col-6', 'col-6'],
+    description: 'Two columns (6/6)'
   },
+  {
+    type: 'two-unequal-1',
+    label: 'Two Unequal Columns',
+    columns: ['col-8', 'col-4'],
+    description: 'Two columns (8/4)'
+  },
+  {
+    type: 'two-unequal-2',
+    label: 'Two Unequal Columns',
+    columns: ['col-4', 'col-8'],
+    description: 'Two columns (4/8)'
+  },
+  // Three column layouts
   {
     type: 'three-equal',
-    label: 'Three Columns',
-    columns: ['col-4', 'col-4', 'col-4']
+    label: 'Three Equal Columns',
+    columns: ['col-4', 'col-4', 'col-4'],
+    description: 'Three columns (4/4/4)'
   },
+  {
+    type: 'three-unequal-1',
+    label: 'Three Unequal Columns',
+    columns: ['col-3', 'col-6', 'col-3'],
+    description: 'Three columns (3/6/3)'
+  },
+  {
+    type: 'three-unequal-2',
+    label: 'Three Unequal Columns',
+    columns: ['col-2', 'col-8', 'col-2'],
+    description: 'Three columns (2/8/2)'
+  },
+  // Four column layouts
   {
     type: 'four-equal',
-    label: 'Four Columns',
-    columns: ['col-3', 'col-3', 'col-3', 'col-3']
+    label: 'Four Equal Columns',
+    columns: ['col-3', 'col-3', 'col-3', 'col-3'],
+    description: 'Four columns (3/3/3/3)'
   },
+  // Six column layouts
   {
-    type: 'sidebar-left',
-    label: 'Sidebar Left',
-    columns: ['col-3', 'col-9']
-  },
-  {
-    type: 'sidebar-right',
-    label: 'Sidebar Right',
-    columns: ['col-9', 'col-3']
-  },
-  {
-    type: 'three-unequal',
-    label: 'Three Columns (25/50/25)',
-    columns: ['col-3', 'col-6', 'col-3']
+    type: 'six-equal',
+    label: 'Six Equal Columns',
+    columns: ['col-2', 'col-2', 'col-2', 'col-2', 'col-2', 'col-2'],
+    description: 'Six columns (2/2/2/2/2/2)'
   }
 ];
 
@@ -92,7 +117,7 @@ export function Sidebar() {
               <div className="flex-1">
                 <div className="font-medium">{layout.label}</div>
                 <div className="text-xs text-muted-foreground">
-                  {layout.columns.join(' + ')}
+                  {layout.description || layout.columns.join(' + ')}
                 </div>
               </div>
             </Button>
