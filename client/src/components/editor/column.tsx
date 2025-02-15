@@ -1,12 +1,11 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Block } from './block';
 import { Card } from '@/components/ui/card';
 import { DragHandle } from './drag-handle';
 import { DeleteButton } from './delete-button';
 import { nanoid } from 'nanoid';
-import { TextBlock } from './blocks/text-block';
+import { getBlockComponent } from './blocks/block-registry';
 
 interface ColumnStyles {
   [key: string]: string;
@@ -84,11 +83,8 @@ export function Column({
 
     const blockType = e.dataTransfer.getData('blockType');
     if (blockType) {
-      // Create new block with default content
       const newBlockId = `block-${nanoid()}`;
       const defaultContent = blockType === 'text' ? '<p>New text block</p>' : '';
-
-      // Update the content through the parent component
       onBlockContentChange(newBlockId, defaultContent);
     }
   };
@@ -146,22 +142,18 @@ export function Column({
                   onSelect: () => onBlockSelect(block.id),
                   styles: block.styles || {},
                   attributes: block.attributes || {},
-                  showBorders: showBorders
+                  showBorders: showBorders,
+                  content: block.innerHtmlOrText,
+                  onContentChange: (content: string) => onBlockContentChange(block.id, content)
                 };
 
-                switch (block.blocktype) {
-                  case 'text':
-                    return (
-                      <TextBlock
-                        {...commonProps}
-                        content={block.innerHtmlOrText}
-                        onContentChange={(content) => onBlockContentChange(block.id, content)}
-                      />
-                    );
-                  // Add cases for other block types here
-                  default:
-                    return null;
+                const BlockComponent = getBlockComponent(block.blocktype);
+                if (!BlockComponent) {
+                  console.warn(`Block type ${block.blocktype} not found`);
+                  return null;
                 }
+
+                return <BlockComponent {...commonProps} />;
               })
             )}
           </div>
