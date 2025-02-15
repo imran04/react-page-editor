@@ -34,6 +34,7 @@ interface RowProps {
   selectedElement: Selection | null;
   styles?: RowStyles;
   attributes?: RowAttributes;
+  showBorders: boolean;
 }
 
 export function Row({ 
@@ -50,7 +51,8 @@ export function Row({
   onBlockSelect,
   selectedElement,
   styles = {},
-  attributes = {}
+  attributes = {},
+  showBorders,
 }: RowProps) {
   const {
     attributes: sortableAttributes,
@@ -92,7 +94,7 @@ export function Row({
       {...sortableAttributes}
       {...listeners}
     >
-      <Card className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
+      <Card className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
         <div className="mb-2 flex justify-between">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
@@ -142,6 +144,7 @@ export function Row({
                   selectedElement={selectedElement}
                   styles={column.styles || {}}
                   attributes={column.attributes || {}}
+                  showBorders={showBorders}
                 />
               ))
             )}

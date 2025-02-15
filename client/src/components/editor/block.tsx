@@ -22,6 +22,7 @@ interface BlockProps {
   onSelect: () => void;
   styles?: BlockStyles;
   attributes?: BlockAttributes;
+  showBorders: boolean;
 }
 
 export function Block({ 
@@ -32,7 +33,8 @@ export function Block({
   isSelected, 
   onSelect, 
   styles = {}, 
-  attributes = {} 
+  attributes = {},
+  showBorders,
 }: BlockProps) {
   const {
     attributes: dragAttributes,
@@ -62,7 +64,7 @@ export function Block({
       {...attributes}
       {...dragAttributes}
     >
-      <Card className={`p-2 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
+      <Card className={`p-2 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}>
         <div className="flex items-start gap-2">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
@@ -89,9 +91,6 @@ export function Block({
           </Button>
         </div>
       </Card>
-      {isSelected && (
-        <div className="absolute inset-0 ring-2 ring-primary rounded-lg pointer-events-none" />
-      )}
     </div>
   );
 }

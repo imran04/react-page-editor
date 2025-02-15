@@ -7,6 +7,8 @@ import {
   useSensor,
   useSensors,
   DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -31,13 +33,20 @@ export default function Editor() {
   const [pageData, setPageData] = useState(sampleTemplate.pages[0]);
   const [showJsonPreview, setShowJsonPreview] = useState(false);
   const [selectedElement, setSelectedElement] = useState<Selection | null>(null);
+  const [showBorders, setShowBorders] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setIsDragging(false);
     const { active, over } = event;
     if (!over) return;
 
@@ -349,6 +358,13 @@ export default function Editor() {
                 </Button>
                 <Button
                   variant="outline"
+                  onClick={() => setShowBorders(!showBorders)}
+                  className="gap-2"
+                >
+                  {showBorders ? 'Hide' : 'Show'} Borders
+                </Button>
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setShowJsonPreview(!showJsonPreview)}
                   className="gap-2"
@@ -363,6 +379,7 @@ export default function Editor() {
               sensors={sensors}
               collisionDetection={closestCenter}
               onDragEnd={handleDragEnd}
+              onDragStart={handleDragStart}
             >
               <SortableContext
                 items={pageData.content.rows.map(row => row.id)}
@@ -400,6 +417,7 @@ export default function Editor() {
                       selectedElement={selectedElement}
                       styles={row.styles}
                       attributes={row.attributes}
+                      showBorders={showBorders || isDragging}
                     />
                   ))
                 )}

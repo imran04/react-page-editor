@@ -32,6 +32,7 @@ interface ColumnProps {
   selectedElement: Selection | null;
   styles?: ColumnStyles;
   attributes?: ColumnAttributes;
+  showBorders: boolean;
 }
 
 export function Column({
@@ -46,7 +47,8 @@ export function Column({
   onBlockSelect,
   selectedElement,
   styles = {},
-  attributes = {}
+  attributes = {},
+  showBorders,
 }: ColumnProps) {
   const {
     attributes: dndAttributes,
@@ -73,7 +75,6 @@ export function Column({
     // Handle block drop here
   };
 
-  // Combine tailwind classes from type prop
   const columnClasses = type ? `${type}` : 'w-full';
 
   return (
@@ -88,7 +89,7 @@ export function Column({
       {...attributes}
     >
       <Card 
-        className={`p-4 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}
+        className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}
         style={styles}
       >
         <div className="mb-2 flex items-center justify-between">
@@ -136,6 +137,7 @@ export function Column({
                   onSelect={() => onBlockSelect(block.id)}
                   styles={block.styles || {}}
                   attributes={block.attributes || {}}
+                  showBorders={showBorders}
                 />
               ))
             )}
