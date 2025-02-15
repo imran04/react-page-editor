@@ -86,15 +86,7 @@ export default function Editor() {
           const newColumn = {
             id: `col-${nanoid()}`,
             type: 'col-6',
-            content: [
-              {
-                id: `block-${nanoid()}`,
-                blocktype: 'text',
-                properties: [],
-                attributes: [],
-                innerHtmlOrText: '<p>New column content</p>'
-              }
-            ]
+            content: [] // Remove default text block
           };
           return {
             ...row,
