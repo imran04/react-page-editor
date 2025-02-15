@@ -3,18 +3,20 @@ import { ImageBlock } from './image-block';
 import { ComponentType } from 'react';
 import { BaseBlockProps } from './base-block';
 
-export type BlockComponent = ComponentType<BaseBlockProps & Record<string, any>>;
+interface BlockProps extends BaseBlockProps {
+  content: string;
+  onContentChange: (content: string) => void;
+}
 
-const blockRegistry: Record<string, BlockComponent> = {
+const blockRegistry: Record<string, ComponentType<BlockProps>> = {
   text: TextBlock,
   image: ImageBlock,
-  // Add more block types here as they are created
 };
 
-export function getBlockComponent(type: string): BlockComponent | null {
+export function getBlockComponent(type: string): ComponentType<BlockProps> | null {
   return blockRegistry[type] || null;
 }
 
-export function registerBlockType(type: string, component: BlockComponent) {
+export function registerBlockType(type: string, component: ComponentType<BlockProps>) {
   blockRegistry[type] = component;
 }

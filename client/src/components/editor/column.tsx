@@ -95,8 +95,8 @@ export function Column({
       };
 
       // Update content array with the new block
-      const updatedContent = [...content, newBlock];
       onBlockContentChange(newBlockId, defaultContent);
+      content.push(newBlock);
     }
   };
 
@@ -112,6 +112,7 @@ export function Column({
         onSelect();
       }}
       {...attributes}
+      {...dndAttributes}
     >
       <Card
         className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dotted' : ''} transition-all duration-200`}
@@ -120,7 +121,6 @@ export function Column({
         <div className="mb-2 flex items-center justify-between">
           <DragHandle 
             dragListeners={listeners}
-            dragAttributes={dndAttributes}
           />
           <DeleteButton onDelete={onRemoveColumn} />
         </div>
@@ -137,9 +137,6 @@ export function Column({
             {content.length === 0 ? (
               <div
                 className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center transition-colors duration-200"
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
               >
                 <p className="text-muted-foreground">Drop blocks here</p>
               </div>
