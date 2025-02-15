@@ -24,7 +24,16 @@ interface BlockProps {
   attributes?: BlockAttributes;
 }
 
-export function Block({ id, content, onContentChange, onRemove, isSelected, onSelect, styles = {}, attributes = {} }: BlockProps) {
+export function Block({ 
+  id, 
+  content, 
+  onContentChange, 
+  onRemove, 
+  isSelected, 
+  onSelect, 
+  styles = {}, 
+  attributes = {} 
+}: BlockProps) {
   const {
     attributes: dragAttributes,
     listeners,
@@ -38,24 +47,26 @@ export function Block({ id, content, onContentChange, onRemove, isSelected, onSe
     transition,
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSelect();
+  };
+
   return (
     <div 
       ref={setNodeRef} 
       style={{ ...style, ...styles }} 
       className="mb-4 relative"
-      onClick={(e) => {
-        e.stopPropagation();
-        onSelect();
-      }}
+      onClick={handleClick}
       {...attributes}
       {...dragAttributes}
-      {...listeners}
     >
       <Card className={`p-2 ${isSelected ? 'ring-2 ring-primary' : ''} transition-all duration-200`}>
         <div className="flex items-start gap-2">
           <button
             className="p-2 hover:bg-muted rounded cursor-move"
-            
+            {...listeners}
           >
             <GripVertical className="w-4 h-4" />
           </button>
