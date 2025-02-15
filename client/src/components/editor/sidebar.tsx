@@ -92,8 +92,8 @@ const columnLayouts: ColumnLayout[] = [
 ];
 
 export function Sidebar() {
-  const onDragStart = (event: React.DragEvent, blockType: string) => {
-    event.dataTransfer.setData('blockType', blockType);
+  const onDragStart = (event: React.DragEvent, layout: ColumnLayout) => {
+    event.dataTransfer.setData('layout', JSON.stringify(layout));
   };
 
   return (
@@ -112,7 +112,7 @@ export function Sidebar() {
               variant="outline"
               className="w-full justify-start gap-2 text-left"
               draggable
-              onDragStart={(e) => onDragStart(e, 'columns')}
+              onDragStart={(e) => onDragStart(e, layout)}
             >
               <div className="flex-1">
                 <div className="font-medium">{layout.label}</div>
@@ -131,7 +131,9 @@ export function Sidebar() {
               variant="outline"
               className="w-full justify-start gap-2"
               draggable
-              onDragStart={(e) => onDragStart(e, block.type)}
+              onDragStart={(e) => {
+                e.dataTransfer.setData('blockType', block.type);
+              }}
             >
               {block.icon}
               {block.label}

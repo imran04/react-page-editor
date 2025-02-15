@@ -134,22 +134,29 @@ export default function Editor() {
     });
   };
 
-  const handleAddRow = () => {
-    setPageData((prevData) => ({
-      ...prevData,
-      content: {
-        ...prevData.content,
-        rows: [
-          ...prevData.content.rows,
-          {
-            id: `row-${nanoid()}`,
-            styles: {},
-            attributes: {},
-            columns: []
-          }
-        ]
-      }
-    }));
+  const handleAddRow = (columnLayout?: string[]) => {
+    setPageData((prevData) => {
+      const newRow = {
+        id: `row-${nanoid()}`,
+        styles: {},
+        attributes: {},
+        columns: columnLayout ? columnLayout.map(type => ({
+          id: `col-${nanoid()}`,
+          type,
+          styles: {},
+          attributes: {},
+          content: []
+        })) : []
+      };
+
+      return {
+        ...prevData,
+        content: {
+          ...prevData.content,
+          rows: [...prevData.content.rows, newRow]
+        }
+      };
+    });
   };
 
   const handleRemoveBlock = (columnId: string, blockId: string) => {
@@ -351,7 +358,7 @@ export default function Editor() {
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
-                  onClick={handleAddRow}
+                  onClick={() => handleAddRow()}
                   className="gap-2"
                 >
                   Add Row
@@ -391,13 +398,14 @@ export default function Editor() {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
-                      const blockType = e.dataTransfer.getData('blockType');
-                      if (blockType === 'columns') {
-                        handleAddRow();
+                      const layoutData = e.dataTransfer.getData('layout');
+                      if (layoutData) {
+                        const layout = JSON.parse(layoutData);
+                        handleAddRow(layout.columns);
                       }
                     }}
                   >
-                    <p className="text-muted-foreground">Drop columns here or click "Add Row" to create a new row</p>
+                    <p className="text-muted-foreground">Drop a layout here or click "Add Row" to create a new row</p>
                   </div>
                 ) : (
                   pageData.content.rows.map(row => (

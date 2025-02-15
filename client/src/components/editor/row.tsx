@@ -75,9 +75,14 @@ export function Row({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const blockType = e.dataTransfer.getData('blockType');
-    if (blockType === 'columns') {
-      onAddColumn(id);
+    const layoutData = e.dataTransfer.getData('layout');
+    if (layoutData) {
+      try {
+        const layout = JSON.parse(layoutData);
+        layout.columns.forEach(() => onAddColumn(id));
+      } catch (error) {
+        console.error('Error parsing layout data:', error);
+      }
     }
   };
 
@@ -112,19 +117,19 @@ export function Row({
           strategy={horizontalListSortingStrategy}
         >
           <div 
-            className="flex flex-wrap -mx-2" // Bootstrap-style row margins
+            className="flex flex-wrap -mx-2" 
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {columns.length === 0 ? (
-              <div className="w-full px-2"> {/* Bootstrap padding */}
+              <div className="w-full px-2"> 
                 <div className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
                   <p className="text-muted-foreground">Drop columns here</p>
                 </div>
               </div>
             ) : (
               columns.map(column => (
-                <div key={column.id} className="px-2"> {/* Bootstrap padding */}
+                <div key={column.id} className="px-2"> 
                   <Column
                     id={column.id}
                     type={column.type}
