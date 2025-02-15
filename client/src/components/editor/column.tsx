@@ -84,7 +84,18 @@ export function Column({
     const blockType = e.dataTransfer.getData('blockType');
     if (blockType) {
       const newBlockId = `block-${nanoid()}`;
+      // Set default content based on block type
       const defaultContent = blockType === 'text' ? '<p>New text block</p>' : '';
+      const newBlock = {
+        id: newBlockId,
+        blocktype: blockType,
+        styles: {},
+        attributes: {},
+        innerHtmlOrText: defaultContent
+      };
+
+      // Update content array with the new block
+      const updatedContent = [...content, newBlock];
       onBlockContentChange(newBlockId, defaultContent);
     }
   };
@@ -107,7 +118,7 @@ export function Column({
         style={styles}
       >
         <div className="mb-2 flex items-center justify-between">
-          <DragHandle
+          <DragHandle 
             dragListeners={listeners}
             dragAttributes={dndAttributes}
           />
@@ -134,26 +145,26 @@ export function Column({
               </div>
             ) : (
               content.map(block => {
-                const commonProps = {
-                  key: block.id,
-                  id: block.id,
-                  onRemove: () => onRemoveBlock(block.id),
-                  isSelected: selectedElement?.type === 'block' && selectedElement.id === block.id,
-                  onSelect: () => onBlockSelect(block.id),
-                  styles: block.styles || {},
-                  attributes: block.attributes || {},
-                  showBorders: showBorders,
-                  content: block.innerHtmlOrText,
-                  onContentChange: (content: string) => onBlockContentChange(block.id, content)
-                };
-
                 const BlockComponent = getBlockComponent(block.blocktype);
                 if (!BlockComponent) {
                   console.warn(`Block type ${block.blocktype} not found`);
                   return null;
                 }
 
-                return <BlockComponent {...commonProps} />;
+                return (
+                  <BlockComponent
+                    key={block.id}
+                    id={block.id}
+                    onRemove={() => onRemoveBlock(block.id)}
+                    isSelected={selectedElement?.type === 'block' && selectedElement.id === block.id}
+                    onSelect={() => onBlockSelect(block.id)}
+                    styles={block.styles || {}}
+                    attributes={block.attributes || {}}
+                    showBorders={showBorders}
+                    content={block.innerHtmlOrText}
+                    onContentChange={(content: string) => onBlockContentChange(block.id, content)}
+                  />
+                );
               })
             )}
           </div>
