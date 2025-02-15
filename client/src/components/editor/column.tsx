@@ -5,6 +5,7 @@ import { Block } from './block';
 import { Card } from '@/components/ui/card';
 import { DragHandle } from './drag-handle';
 import { DeleteButton } from './delete-button';
+import { nanoid } from 'nanoid';
 
 interface ColumnStyles {
   [key: string]: string;
@@ -66,13 +67,34 @@ export function Column({
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    e.currentTarget.classList.add('bg-primary/10');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('bg-primary/10');
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    e.currentTarget.classList.remove('bg-primary/10');
+
     const blockType = e.dataTransfer.getData('blockType');
-    // Handle block drop here
+    if (blockType) {
+      const newBlock = {
+        id: `block-${nanoid()}`,
+        blocktype: blockType,
+        styles: {},
+        attributes: {},
+        innerHtmlOrText: blockType === 'text' ? '<p>New text block</p>' : ''
+      };
+
+      // Update content array with the new block
+      const updatedContent = [...content, newBlock];
+      onBlockContentChange(newBlock.id, newBlock.innerHtmlOrText);
+    }
   };
 
   const columnClasses = type ? `${type}` : 'w-full';
@@ -103,11 +125,17 @@ export function Column({
           items={content.map(block => block.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-4">
+          <div 
+            className="space-y-4"
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             {content.length === 0 ? (
               <div
-                className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center"
+                className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center transition-colors duration-200"
                 onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
                 <p className="text-muted-foreground">Drop blocks here</p>
