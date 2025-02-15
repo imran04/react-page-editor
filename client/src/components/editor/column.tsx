@@ -3,9 +3,8 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities';
 import { Block } from './block';
 import { Card } from '@/components/ui/card';
-import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DragIcon } from './drag-icon';
+import { DragHandle } from './drag-handle';
+import { DeleteButton } from './delete-button';
 
 interface ColumnStyles {
   [key: string]: string;
@@ -94,25 +93,11 @@ export function Column({
         style={styles}
       >
         <div className="mb-2 flex items-center justify-between">
-          <button
-            className="p-2 hover:bg-muted rounded cursor-move"
-            {...dndAttributes}
-            {...listeners}
-          >
-            <DragIcon className="w-4 h-4" />
-          </button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRemoveColumn();
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          <DragHandle 
+            dragListeners={listeners}
+            dragAttributes={dndAttributes}
+          />
+          <DeleteButton onDelete={onRemoveColumn} />
         </div>
         <SortableContext
           items={content.map(block => block.id)}

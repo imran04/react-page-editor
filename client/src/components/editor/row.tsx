@@ -3,9 +3,8 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { CSS } from '@dnd-kit/utilities';
 import { Column } from './column';
 import { Card } from '@/components/ui/card';
-import { Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { DragIcon } from './drag-icon';
+import { DragHandle } from './drag-handle';
+import { DeleteButton } from './delete-button';
 
 interface Selection {
   type: 'row' | 'column' | 'block';
@@ -96,24 +95,8 @@ export function Row({
     >
       <Card className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
         <div className="mb-2 flex justify-between">
-          <button
-            className="p-2 hover:bg-muted rounded cursor-move"
-            {...listeners}
-          >
-            <DragIcon className="w-4 h-4" />
-          </button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRemoveRow();
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          <DragHandle dragListeners={listeners} />
+          <DeleteButton onDelete={onRemoveRow} />
         </div>
         <SortableContext
           items={columns.map(col => col.id)}
