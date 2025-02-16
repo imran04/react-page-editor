@@ -27,15 +27,13 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       setLoading(true);
       setError(null);
 
-      // Make the API call with the correct request structure
+      // Send the data object directly in the request body
       const response = await fetch('/api/preview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          json: JSON.stringify(data)
-        })
+        body: JSON.stringify(data)
       });
 
       if (!response.ok) {

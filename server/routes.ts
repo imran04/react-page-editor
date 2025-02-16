@@ -8,11 +8,9 @@ import path from 'path';
 export function registerRoutes(app: Express): Server {
   app.post('/api/preview', async (req, res) => {
     try {
-      const { json } = req.body;
-
-      // Create a temporary JSON file
+      // Create a temporary JSON file with the request body directly
       const tempJsonPath = path.join(process.cwd(), 'temp.json');
-      fs.writeFileSync(tempJsonPath, json);
+      fs.writeFileSync(tempJsonPath, JSON.stringify(req.body));
 
       // Execute the C# converter
       exec(`dotnet run JsonToHtml.cs ${tempJsonPath}`, (error, stdout, stderr) => {
