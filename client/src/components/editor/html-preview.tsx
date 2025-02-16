@@ -27,13 +27,13 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       setLoading(true);
       setError(null);
 
-      // Call the OpenAPI endpoint directly
+      // Call the OpenAPI endpoint directly with stringified data
       const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: data // Send data directly without stringifying
+        body: JSON.stringify(data) // Stringify the data before sending
       });
 
       if (!response.ok) {
