@@ -15,10 +15,11 @@ import {
 } from '@dnd-kit/sortable';
 import { Row } from '@/components/editor/row';
 import { JsonPreview } from '@/components/editor/json-preview';
+import { HtmlPreview } from '@/components/editor/html-preview';
 import { Sidebar } from '@/components/editor/sidebar';
 import { sampleTemplate } from '@/lib/sample-data';
 import { Button } from '@/components/ui/button';
-import { Code } from 'lucide-react';
+import { Code, Eye } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { PropertiesPanel } from '@/components/editor/properties-panel';
 
@@ -30,6 +31,7 @@ interface Selection {
 export default function Editor() {
   const [pageData, setPageData] = useState(sampleTemplate.pages[0]);
   const [showJsonPreview, setShowJsonPreview] = useState(false);
+  const [showHtmlPreview, setShowHtmlPreview] = useState(false);
   const [selectedElement, setSelectedElement] = useState<Selection | null>(null);
   const [showBorders, setShowBorders] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -73,7 +75,6 @@ export default function Editor() {
             const block = col.content.find(b => b.id === blockId);
 
             if (!block) {
-              // If block doesn't exist, create a new one
               return {
                 ...col,
                 content: [
@@ -89,7 +90,6 @@ export default function Editor() {
               };
             }
 
-            // If block exists, update its content
             return {
               ...col,
               content: col.content.map(block =>
@@ -406,14 +406,11 @@ export default function Editor() {
 
   return (
     <div className="flex h-screen bg-muted/10">
-      {/* Sidebar */}
       <div className="w-64 p-4 border-r bg-background">
         <Sidebar />
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex">
-        {/* Editor Area */}
         <div className={`flex-1 overflow-auto p-8 ${selectedElement ? 'mr-80' : ''}`}>
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
@@ -432,6 +429,15 @@ export default function Editor() {
                   className="gap-2"
                 >
                   {showBorders ? 'Hide' : 'Show'} Borders
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowHtmlPreview(!showHtmlPreview)}
+                  className="gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  {showHtmlPreview ? 'Hide' : 'Show'} Preview
                 </Button>
                 <Button
                   variant="outline"
@@ -480,7 +486,6 @@ export default function Editor() {
           </div>
         </div>
 
-        {/* Properties Panel */}
         <div 
           className={`fixed right-0 top-0 bottom-0 w-80 border-l bg-background transform transition-transform duration-200 ease-in-out ${
             selectedElement ? 'translate-x-0' : 'translate-x-full'
@@ -495,7 +500,16 @@ export default function Editor() {
           </div>
         </div>
 
-        {/* JSON Preview Panel */}
+        <div
+          className={`fixed right-0 top-0 bottom-0 w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
+            showHtmlPreview ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-4 h-full">
+            <HtmlPreview data={pageData} />
+          </div>
+        </div>
+
         <div
           className={`fixed right-0 top-0 bottom-0 w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
             showJsonPreview ? 'translate-x-0' : 'translate-x-full'
