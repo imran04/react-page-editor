@@ -473,6 +473,7 @@ export default function Editor() {
                     onRemoveColumn={handleRemoveColumn}
                     onRemoveRow={() => handleRemoveRow(row.id)}
                     isSelected={selectedElement?.type === 'row' && selectedElement.id === row.id}
+                    mouseOver={false}
                     onSelect={() => handleSelect('row', row.id)}
                     onColumnSelect={(columnId) => handleSelect('column', columnId)}
                     onBlockSelect={(blockId) => handleSelect('block', blockId)}
@@ -487,7 +488,7 @@ export default function Editor() {
           </div>
         </div>
 
-        <div 
+        <div
           className={`fixed right-0 top-0 bottom-0 w-80 border-l bg-background transform transition-transform duration-200 ease-in-out ${
             selectedElement ? 'translate-x-0' : 'translate-x-full'
           }`}
@@ -501,9 +502,9 @@ export default function Editor() {
           </div>
         </div>
 
-        <HtmlPreview 
-          data={pageData} 
-          open={showHtmlPreview} 
+        <HtmlPreview
+          data={pageData}
+          open={showHtmlPreview}
           onOpenChange={setShowHtmlPreview}
         />
 
