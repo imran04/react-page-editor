@@ -1,5 +1,5 @@
 import { Card } from '@/components/ui/card';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,18 +15,28 @@ interface HtmlPreviewProps {
 
 export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!iframeRef.current || !open) return;
 
-    const html = generateHtml(data);
-    const iframe = iframeRef.current;
-    iframe.srcdoc = html;
+    try {
+      const html = generateHtml(data);
+      const iframe = iframeRef.current;
+      iframe.srcdoc = html;
+      console.log('Preview HTML generated:', html); // Debug log
+      setError(null);
+    } catch (err) {
+      console.error('Error generating preview:', err);
+      setError(err instanceof Error ? err.message : 'Error generating preview');
+    }
   }, [data, open]);
 
-  const generateHtml = (pageData: any) => {
-    const generateBlockHtml = (block: any) => {
-      const styleAttr = block.styles ? ` style="${Object.entries(block.styles).map(([k, v]) => `${k}:${v}`).join(';')}"` : '';
+  const generateBlockHtml = (block: any) => {
+    try {
+      const styleAttr = block.styles 
+        ? ` style="${Object.entries(block.styles).map(([k, v]) => `${k}:${v}`).join(';')}"` 
+        : '';
 
       switch (block.blocktype.toLowerCase()) {
         case 'text':
@@ -36,43 +46,58 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
         default:
           return `<div class="content-block"${styleAttr}>${block.innerHtmlOrText}</div>`;
       }
-    };
+    } catch (err) {
+      console.error('Error generating block HTML:', err, block);
+      throw new Error(`Error generating block HTML: ${err}`);
+    }
+  };
 
-    const rows = pageData.content.rows.map((row: any) => {
-      const columns = row.columns.map((col: any) => {
-        const bootstrapColClass = col.type.replace('col-', 'col-md-');
-        const blocks = col.content.map((block: any) => generateBlockHtml(block)).join('\n');
+  const generateHtml = (pageData: any) => {
+    try {
+      const rows = pageData.content.rows.map((row: any) => {
+        const columns = row.columns.map((col: any) => {
+          const bootstrapColClass = col.type.replace('col-', 'col-md-');
+          const blocks = col.content.map((block: any) => generateBlockHtml(block)).join('\n');
+          return `
+            <div class="${bootstrapColClass}">
+              ${blocks}
+            </div>
+          `;
+        }).join('\n');
+
         return `
-          <div class="${bootstrapColClass}">
-            ${blocks}
+          <div class="row my-4">
+            ${columns}
           </div>
         `;
       }).join('\n');
 
       return `
-        <div class="row my-4">
-          ${columns}
-        </div>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>${pageData.metadata.title || 'Page Preview'}</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <style>
+            body { padding: 20px; }
+            .content-block { margin-bottom: 1rem; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            ${rows}
+          </div>
+          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </body>
+        </html>
       `;
-    }).join('\n');
-
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>${pageData.metadata.title}</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-      </head>
-      <body>
-        <div class="container">
-          ${rows}
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-      </body>
-      </html>
-    `;
+    } catch (err) {
+      console.error('Error generating page HTML:', err);
+      throw new Error(`Error generating page HTML: ${err}`);
+    }
   };
 
   return (
@@ -82,11 +107,16 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
           <DialogTitle>Page Preview</DialogTitle>
         </DialogHeader>
         <div className="flex-1 bg-white rounded-lg overflow-hidden h-full">
-          <iframe
-            ref={iframeRef}
-            className="w-full h-full border-0"
-            title="Page Preview"
-          />
+          {error ? (
+            <div className="p-4 text-red-500">{error}</div>
+          ) : (
+            <iframe
+              ref={iframeRef}
+              className="w-full h-full border-0"
+              title="Page Preview"
+              sandbox="allow-same-origin allow-scripts"
+            />
+          )}
         </div>
       </DialogContent>
     </Dialog>
