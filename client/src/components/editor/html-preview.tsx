@@ -1,25 +1,33 @@
 import { Card } from '@/components/ui/card';
 import { useEffect, useRef } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface HtmlPreviewProps {
   data: any;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function HtmlPreview({ data }: HtmlPreviewProps) {
+export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
-    if (!iframeRef.current) return;
+    if (!iframeRef.current || !open) return;
 
     const html = generateHtml(data);
     const iframe = iframeRef.current;
     iframe.srcdoc = html;
-  }, [data]);
+  }, [data, open]);
 
   const generateHtml = (pageData: any) => {
     const generateBlockHtml = (block: any) => {
       const styleAttr = block.styles ? ` style="${Object.entries(block.styles).map(([k, v]) => `${k}:${v}`).join(';')}"` : '';
-      
+
       switch (block.blocktype.toLowerCase()) {
         case 'text':
           return `<div class="content-block"${styleAttr}>${block.innerHtmlOrText}</div>`;
@@ -68,15 +76,19 @@ export function HtmlPreview({ data }: HtmlPreviewProps) {
   };
 
   return (
-    <Card className="bg-muted p-4 h-full">
-      <h3 className="text-lg font-semibold mb-4">HTML Preview</h3>
-      <div className="w-full h-[calc(100vh-10rem)] bg-white rounded-lg overflow-hidden">
-        <iframe
-          ref={iframeRef}
-          className="w-full h-full border-0"
-          title="Page Preview"
-        />
-      </div>
-    </Card>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[95vh] max-h-[95vh]">
+        <DialogHeader>
+          <DialogTitle>Page Preview</DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 bg-white rounded-lg overflow-hidden h-full">
+          <iframe
+            ref={iframeRef}
+            className="w-full h-full border-0"
+            title="Page Preview"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

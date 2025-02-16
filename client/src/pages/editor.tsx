@@ -433,11 +433,11 @@ export default function Editor() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowHtmlPreview(!showHtmlPreview)}
+                  onClick={() => setShowHtmlPreview(true)}
                   className="gap-2"
                 >
                   <Eye className="h-4 w-4" />
-                  {showHtmlPreview ? 'Hide' : 'Show'} Preview
+                  Preview
                 </Button>
                 <Button
                   variant="outline"
@@ -468,6 +468,7 @@ export default function Editor() {
                     columns={row.columns}
                     onBlockContentChange={handleBlockContentChange}
                     onAddBlock={handleAddBlock}
+                    onAddColumn={handleAddColumn}
                     onRemoveBlock={handleRemoveBlock}
                     onRemoveColumn={handleRemoveColumn}
                     onRemoveRow={() => handleRemoveRow(row.id)}
@@ -500,15 +501,11 @@ export default function Editor() {
           </div>
         </div>
 
-        <div
-          className={`fixed right-0 top-0 bottom-0 w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
-            showHtmlPreview ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <div className="p-4 h-full">
-            <HtmlPreview data={pageData} />
-          </div>
-        </div>
+        <HtmlPreview 
+          data={pageData} 
+          open={showHtmlPreview} 
+          onOpenChange={setShowHtmlPreview}
+        />
 
         <div
           className={`fixed right-0 top-0 bottom-0 w-96 border-l bg-background overflow-auto transition-all duration-300 ease-in-out ${
