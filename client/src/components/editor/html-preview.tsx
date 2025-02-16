@@ -26,13 +26,15 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
         setLoading(true);
         setError(null);
 
-        // Make the API call
+        // Make the API call with the correct request structure
         const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(data)
+          body: JSON.stringify({
+            json: JSON.stringify(data)
+          })
         });
 
         if (!response.ok) {
