@@ -24,7 +24,6 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       const html = generateHtml(data);
       const iframe = iframeRef.current;
       iframe.srcdoc = html;
-      console.log('Preview HTML generated:', html); // Debug log
       setError(null);
     } catch (err) {
       console.error('Error generating preview:', err);
@@ -40,11 +39,11 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
 
       switch (block.blocktype.toLowerCase()) {
         case 'text':
-          return `<div class="content-block"${styleAttr}>${block.innerHtmlOrText}</div>`;
+          return `<div class="content-block" ${styleAttr}>${block.innerHtmlOrText}</div>`;
         case 'image':
-          return `<div class="content-block"${styleAttr}><img src="${block.innerHtmlOrText}" class="img-fluid" alt="Content image"></div>`;
+          return `<div class="content-block" ${styleAttr}><img src="${block.innerHtmlOrText}" class="img-fluid" alt="Content image"></div>`;
         default:
-          return `<div class="content-block"${styleAttr}>${block.innerHtmlOrText}</div>`;
+          return `<div class="content-block" ${styleAttr}>${block.innerHtmlOrText}</div>`;
       }
     } catch (err) {
       console.error('Error generating block HTML:', err, block);
