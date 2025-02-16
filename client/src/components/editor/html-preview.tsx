@@ -16,88 +16,42 @@ interface HtmlPreviewProps {
 export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!iframeRef.current || !open) return;
 
-    try {
-      const html = generateHtml(data);
-      const iframe = iframeRef.current;
-      iframe.srcdoc = html;
-      setError(null);
-    } catch (err) {
-      console.error('Error generating preview:', err);
-      setError(err instanceof Error ? err.message : 'Error generating preview');
-    }
-  }, [data, open]);
+    const fetchHtml = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-  const generateBlockHtml = (block: any) => {
-    try {
-      const styleAttr = block.styles 
-        ? ` style="${Object.entries(block.styles).map(([k, v]) => `${k}:${v}`).join(';')}"` 
-        : '';
+        // Prepare the JSON data
+        const jsonStr = encodeURIComponent(JSON.stringify(data));
 
-      switch (block.blocktype.toLowerCase()) {
-        case 'text':
-          return `<div class="content-block" ${styleAttr}>${block.innerHtmlOrText}</div>`;
-        case 'image':
-          return `<div class="content-block" ${styleAttr}><img src="${block.innerHtmlOrText}" class="img-fluid" alt="Content image"></div>`;
-        default:
-          return `<div class="content-block" ${styleAttr}>${block.innerHtmlOrText}</div>`;
+        // Make the API call
+        const response = await fetch(`https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast?json=${jsonStr}`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch HTML: ${response.statusText}`);
+        }
+
+        const html = await response.text();
+
+        // Update the iframe content
+        if (iframeRef.current) {
+          iframeRef.current.srcdoc = html;
+        }
+      } catch (err) {
+        console.error('Error fetching preview:', err);
+        setError(err instanceof Error ? err.message : 'Error generating preview');
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error('Error generating block HTML:', err, block);
-      throw new Error(`Error generating block HTML: ${err}`);
-    }
-  };
+    };
 
-  const generateHtml = (pageData: any) => {
-    try {
-      const rows = pageData.content.rows.map((row: any) => {
-        const columns = row.columns.map((col: any) => {
-          const bootstrapColClass = col.type.replace('col-', 'col-md-');
-          const blocks = col.content.map((block: any) => generateBlockHtml(block)).join('\n');
-          return `
-            <div class="${bootstrapColClass}">
-              ${blocks}
-            </div>
-          `;
-        }).join('\n');
-
-        return `
-          <div class="row my-4">
-            ${columns}
-          </div>
-        `;
-      }).join('\n');
-
-      return `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${pageData.metadata.title || 'Page Preview'}</title>
-          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-          <style>
-            body { padding: 20px; }
-            .content-block { margin-bottom: 1rem; }
-            img { max-width: 100%; height: auto; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            ${rows}
-          </div>
-          <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        </body>
-        </html>
-      `;
-    } catch (err) {
-      console.error('Error generating page HTML:', err);
-      throw new Error(`Error generating page HTML: ${err}`);
-    }
-  };
+    fetchHtml();
+  }, [data, open]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,14 +62,18 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
         <div className="flex-1 bg-white rounded-lg overflow-hidden h-full">
           {error ? (
             <div className="p-4 text-red-500">{error}</div>
+          ) : loading ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
           ) : (
             <iframe
               ref={iframeRef}
               className="w-full h-full border-0"
               title="Page Preview"
               sandbox="allow-same-origin allow-scripts"
-              allow="encrypted-media" //added for security
-              srcDoc="" //ensure srcDoc is set to empty string initially.
+              allow="encrypted-media"
+              srcDoc=""
             />
           )}
         </div>
