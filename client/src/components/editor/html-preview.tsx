@@ -26,11 +26,14 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
         setLoading(true);
         setError(null);
 
-        // Prepare the JSON data
-        const jsonStr = encodeURIComponent(JSON.stringify(data));
-
         // Make the API call
-        const response = await fetch(`https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast?json=${jsonStr}`);
+        const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data)
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch HTML: ${response.statusText}`);
