@@ -27,8 +27,8 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       setLoading(true);
       setError(null);
 
-      // Call the OpenAPI endpoint with the correct structure
-      const response = await fetch('http://localhost:5034/WeatherForecast', {
+      // Call the OpenAPI endpoint with the correct URL
+      const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
