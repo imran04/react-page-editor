@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 
 interface HtmlPreviewProps {
@@ -27,7 +28,7 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       setError(null);
 
       // Make the API call with the correct request structure
-      const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
+      const response = await fetch('/api/preview', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,6 +70,9 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
               {loading ? 'Generating...' : 'Generate Preview'}
             </Button>
           </DialogTitle>
+          <DialogDescription>
+            Click Generate Preview to see how your page will look
+          </DialogDescription>
         </DialogHeader>
         <div className="flex-1 bg-white rounded-lg overflow-hidden h-full">
           {error ? (
