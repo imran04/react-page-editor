@@ -114,6 +114,8 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
               className="w-full h-full border-0"
               title="Page Preview"
               sandbox="allow-same-origin allow-scripts"
+              allow="encrypted-media" //added for security
+              srcDoc="" //ensure srcDoc is set to empty string initially.
             />
           )}
         </div>
