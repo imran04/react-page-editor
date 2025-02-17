@@ -4,61 +4,56 @@ import { Button } from '@/components/ui/button';
 import { Settings2 } from 'lucide-react';
 import { FormBuilder } from '../form-builder';
 
-interface FormData {
-  html: string;
-  schema: any;
-  config: {
-    fields: Array<{
-      type: string;
+interface FormConfig {
+  fields: Array<{
+    type: string;
+    label: string;
+    name: string;
+    placeholder?: string;
+    options?: Array<{
       label: string;
-      name: string;
-      placeholder?: string;
-      options?: Array<{
-        label: string;
-        value: string;
-      }>;
-      validation?: Array<{
-        type: string;
-        value?: string | number;
-        message?: string;
-      }>;
+      value: string;
     }>;
-  };
+    validation?: Array<{
+      type: string;
+      value?: string | number;
+      message?: string;
+    }>;
+  }>;
 }
 
 interface FormBlockProps extends Omit<BaseBlockProps, 'children'> {
   content: string;
   onContentChange: (content: string) => void;
+  attributes: Record<string, any>;
+  onAttributesChange: (attributes: Record<string, any>) => void;
 }
 
 export function FormBlock({ 
   content, 
   onContentChange,
+  attributes,
+  onAttributesChange,
   ...baseProps
 }: FormBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
-  const [formData, setFormData] = useState<FormData | null>(() => {
-    try {
-      // Try to parse existing JSON data from content
-      if (content.startsWith('{')) {
-        return JSON.parse(content);
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  });
 
-  const handleSave = (data: FormData) => {
-    setFormData(data);
-    // Store the complete form data as JSON
-    onContentChange(JSON.stringify(data, null, 2));
+  const handleSave = (data: { html: string; schema: any; config: FormConfig }) => {
+    // Store the HTML in content
+    onContentChange(data.html);
+
+    // Store the form configuration in attributes
+    onAttributesChange({
+      ...attributes,
+      formSchema: data.schema,
+      formConfig: data.config
+    });
   };
 
   const parseInitialData = () => {
     try {
-      if (formData) {
-        return formData.config.fields;
+      if (attributes.formConfig?.fields) {
+        return attributes.formConfig.fields;
       }
       return [];
     } catch {
@@ -82,7 +77,7 @@ export function FormBlock({
         <div 
           className="p-4 bg-muted/50 rounded-lg"
           dangerouslySetInnerHTML={{ 
-            __html: formData?.html || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' 
+            __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' 
           }}
         />
       </div>
