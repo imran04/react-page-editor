@@ -7,7 +7,23 @@ import { FormBuilder } from '../form-builder';
 interface FormData {
   html: string;
   schema: any;
-  config: any;
+  config: {
+    fields: Array<{
+      type: string;
+      label: string;
+      name: string;
+      placeholder?: string;
+      options?: Array<{
+        label: string;
+        value: string;
+      }>;
+      validation?: Array<{
+        type: string;
+        value?: string | number;
+        message?: string;
+      }>;
+    }>;
+  };
 }
 
 interface FormBlockProps extends Omit<BaseBlockProps, 'children'> {
@@ -21,11 +37,22 @@ export function FormBlock({
   ...baseProps
 }: FormBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(() => {
+    try {
+      // Try to parse existing JSON data from content
+      if (content.startsWith('{')) {
+        return JSON.parse(content);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  });
 
   const handleSave = (data: FormData) => {
     setFormData(data);
-    onContentChange(data.html);
+    // Store the complete form data as JSON
+    onContentChange(JSON.stringify(data, null, 2));
   };
 
   const parseInitialData = () => {
@@ -55,7 +82,7 @@ export function FormBlock({
         <div 
           className="p-4 bg-muted/50 rounded-lg"
           dangerouslySetInnerHTML={{ 
-            __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' 
+            __html: formData?.html || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' 
           }}
         />
       </div>
