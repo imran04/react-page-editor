@@ -21,7 +21,7 @@ export interface ValidationRule {
 
 export interface FormField {
   id: string;
-  type: 'text' | 'textarea' | 'select' | 'number' | 'email';
+  type: 'text' | 'textarea' | 'select' | 'number' | 'email' | 'password' | 'tel' | 'date' | 'time' | 'checkbox' | 'radio' | 'url' | 'color' | 'file';
   label: string;
   name: string;
   placeholder?: string;
@@ -45,6 +45,7 @@ export function FormBuilder({
   const [fields, setFields] = useState<FormField[]>(initialData);
   const [showJson, setShowJson] = useState(false);
   const [previewTab, setPreviewTab] = useState<'edit' | 'preview'>('edit');
+  const [submitButtonText, setSubmitButtonText] = useState('Submit');
   const [parent] = useAutoAnimate();
 
   const addField = () => {
@@ -119,9 +120,126 @@ export function FormBuilder({
     return z.object(schemaFields);
   };
 
+  const generateFormHtml = (fields: FormField[]): string => {
+    return `
+      <form class="space-y-4">
+        ${fields.map(field => {
+          const commonClasses = 'w-full p-2 border rounded-md';
+          const validationAttrs = field.validation?.reduce((acc, rule) => {
+            switch (rule.type) {
+              case 'required':
+                return { ...acc, required: true };
+              case 'pattern':
+                return { ...acc, pattern: rule.value };
+              case 'min':
+                return { ...acc, minlength: rule.value };
+              case 'max':
+                return { ...acc, maxlength: rule.value };
+              default:
+                return acc;
+            }
+          }, {});
+
+          const attrs = Object.entries(validationAttrs || {})
+            .map(([key, value]) => `${key}="${value}"`)
+            .join(' ');
+
+          switch (field.type) {
+            case 'text':
+            case 'email':
+            case 'number':
+            case 'password':
+            case 'tel':
+            case 'date':
+            case 'time':
+            case 'url':
+            case 'color':
+            case 'file':
+              return `
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium">${field.label}</label>
+                  <input 
+                    type="${field.type}"
+                    name="${field.name}"
+                    placeholder="${field.placeholder || ''}"
+                    class="${commonClasses}"
+                    ${attrs}
+                  />
+                </div>
+              `;
+            case 'textarea':
+              return `
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium">${field.label}</label>
+                  <textarea
+                    name="${field.name}"
+                    placeholder="${field.placeholder || ''}"
+                    class="${commonClasses}"
+                    ${attrs}
+                  ></textarea>
+                </div>
+              `;
+            case 'select':
+              return `
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium">${field.label}</label>
+                  <select name="${field.name}" class="${commonClasses}" ${attrs}>
+                    <option value="">${field.placeholder || 'Select an option'}</option>
+                    ${field.options?.map(opt => 
+                      `<option value="${opt.value}">${opt.label}</option>`
+                    ).join('')}
+                  </select>
+                </div>
+              `;
+            case 'checkbox':
+              return `
+                <div class="space-y-2">
+                  <label class="flex items-center gap-2">
+                    <input 
+                      type="checkbox"
+                      name="${field.name}"
+                      class="h-4 w-4 rounded border-gray-300"
+                      ${attrs}
+                    />
+                    <span class="text-sm font-medium">${field.label}</span>
+                  </label>
+                </div>
+              `;
+            case 'radio':
+              return `
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium">${field.label}</label>
+                  <div class="space-y-1">
+                    ${field.options?.map(opt => `
+                      <label class="flex items-center gap-2">
+                        <input 
+                          type="radio"
+                          name="${field.name}"
+                          value="${opt.value}"
+                          class="h-4 w-4 border-gray-300"
+                          ${attrs}
+                        />
+                        <span class="text-sm">${opt.label}</span>
+                      </label>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            default:
+              return '';
+          }
+        }).join('')}
+        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
+          ${submitButtonText}
+        </button>
+      </form>
+    `;
+  };
+
   const handleSave = () => {
     const formConfig = {
-      fields: fields.map(({ id, ...field }) => field)
+      fields: fields.map(({ id, ...field }) => field),
+      submitButtonText
     };
 
     const schema = generateZodSchema();
@@ -176,150 +294,169 @@ export function FormBuilder({
             </TabsList>
 
             <TabsContent value="edit">
-              <div className="flex justify-end mb-4">
-                <Button onClick={addField} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Add Field
-                </Button>
-              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="space-y-2">
+                    <Label>Submit Button Text</Label>
+                    <Input
+                      value={submitButtonText}
+                      onChange={(e) => setSubmitButtonText(e.target.value)}
+                      placeholder="Submit button text"
+                    />
+                  </div>
+                  <Button onClick={addField} className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Field
+                  </Button>
+                </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div ref={parent} className="space-y-4">
-                  {fields.map((field, index) => (
-                    <Card key={field.id} className="p-4">
-                      <div className="flex items-center gap-2 mb-4">
-                        <MoveVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                        <div className="flex-1 space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Field Type</Label>
-                              <Select
-                                value={field.type}
-                                onValueChange={(value: any) => updateField(field.id, { type: value })}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="text">Text</SelectItem>
-                                  <SelectItem value="textarea">Text Area</SelectItem>
-                                  <SelectItem value="select">Select</SelectItem>
-                                  <SelectItem value="number">Number</SelectItem>
-                                  <SelectItem value="email">Email</SelectItem>
-                                </SelectContent>
-                              </Select>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div ref={parent} className="space-y-4">
+                    {fields.map((field, index) => (
+                      <Card key={field.id} className="p-4">
+                        <div className="flex items-center gap-2 mb-4">
+                          <MoveVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                          <div className="flex-1 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Field Type</Label>
+                                <Select
+                                  value={field.type}
+                                  onValueChange={(value: any) => updateField(field.id, { type: value })}
+                                >
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="text">Text</SelectItem>
+                                    <SelectItem value="textarea">Text Area</SelectItem>
+                                    <SelectItem value="select">Select</SelectItem>
+                                    <SelectItem value="number">Number</SelectItem>
+                                    <SelectItem value="email">Email</SelectItem>
+                                    <SelectItem value="password">Password</SelectItem>
+                                    <SelectItem value="tel">Telephone</SelectItem>
+                                    <SelectItem value="date">Date</SelectItem>
+                                    <SelectItem value="time">Time</SelectItem>
+                                    <SelectItem value="checkbox">Checkbox</SelectItem>
+                                    <SelectItem value="radio">Radio</SelectItem>
+                                    <SelectItem value="url">URL</SelectItem>
+                                    <SelectItem value="color">Color</SelectItem>
+                                    <SelectItem value="file">File Upload</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Label</Label>
+                                <Input
+                                  value={field.label}
+                                  onChange={(e) => updateField(field.id, { label: e.target.value })}
+                                  placeholder="Field Label"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-2">
-                              <Label>Label</Label>
-                              <Input
-                                value={field.label}
-                                onChange={(e) => updateField(field.id, { label: e.target.value })}
-                                placeholder="Field Label"
-                              />
-                            </div>
-                          </div>
 
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>Field Name</Label>
-                              <Input
-                                value={field.name}
-                                onChange={(e) => updateField(field.id, { name: e.target.value })}
-                                placeholder="Field name for form data"
-                              />
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label>Field Name</Label>
+                                <Input
+                                  value={field.name}
+                                  onChange={(e) => updateField(field.id, { name: e.target.value })}
+                                  placeholder="Field name for form data"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label>Placeholder</Label>
+                                <Input
+                                  value={field.placeholder}
+                                  onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
+                                  placeholder="Placeholder text"
+                                />
+                              </div>
                             </div>
-                            <div className="space-y-2">
-                              <Label>Placeholder</Label>
-                              <Input
-                                value={field.placeholder}
-                                onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                                placeholder="Placeholder text"
-                              />
-                            </div>
-                          </div>
 
-                          <div className="space-y-2">
-                            <Label>Validation</Label>
-                            <div className="space-x-2">
-                              <Checkbox 
-                                checked={field.validation?.some(rule => rule.type === 'required')}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    addValidation(field.id, { type: 'required' });
-                                  } else {
-                                    removeValidation(field.id, 'required');
-                                  }
-                                }}
-                              />
-                              <Label>Required</Label>
-                            </div>
-                            {field.type === 'email' && (
+                            <div className="space-y-2">
+                              <Label>Validation</Label>
                               <div className="space-x-2">
                                 <Checkbox 
-                                  checked={field.validation?.some(rule => rule.type === 'email')}
+                                  checked={field.validation?.some(rule => rule.type === 'required')}
                                   onCheckedChange={(checked) => {
                                     if (checked) {
-                                      addValidation(field.id, { type: 'email' });
+                                      addValidation(field.id, { type: 'required' });
                                     } else {
-                                      removeValidation(field.id, 'email');
+                                      removeValidation(field.id, 'required');
                                     }
                                   }}
                                 />
-                                <Label>Email Format</Label>
+                                <Label>Required</Label>
+                              </div>
+                              {field.type === 'email' && (
+                                <div className="space-x-2">
+                                  <Checkbox 
+                                    checked={field.validation?.some(rule => rule.type === 'email')}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        addValidation(field.id, { type: 'email' });
+                                      } else {
+                                        removeValidation(field.id, 'email');
+                                      }
+                                    }}
+                                  />
+                                  <Label>Email Format</Label>
+                                </div>
+                              )}
+                            </div>
+
+                            {(field.type === 'select' || field.type === 'radio') && (
+                              <div className="space-y-2">
+                                <Label>Options (one per line)</Label>
+                                <Textarea
+                                  value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
+                                  onChange={(e) => {
+                                    const options = e.target.value.split('\n').map(line => {
+                                      const [label, value] = line.split('=');
+                                      return { label: label || '', value: value || label || '' };
+                                    });
+                                    updateField(field.id, { options });
+                                  }}
+                                  placeholder="Option Label=value"
+                                />
                               </div>
                             )}
                           </div>
-
-                          {field.type === 'select' && (
-                            <div className="space-y-2">
-                              <Label>Options (one per line)</Label>
-                              <Textarea
-                                value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
-                                onChange={(e) => {
-                                  const options = e.target.value.split('\n').map(line => {
-                                    const [label, value] = line.split('=');
-                                    return { label: label || '', value: value || label || '' };
-                                  });
-                                  updateField(field.id, { options });
-                                }}
-                                placeholder="Option Label=value"
-                              />
-                            </div>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeField(field.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeField(field.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    ))}
 
-                  {fields.length === 0 && (
-                    <div className="text-center py-8 text-muted-foreground">
-                      No fields added yet. Click "Add Field" to start building your form.
+                    {fields.length === 0 && (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No fields added yet. Click "Add Field" to start building your form.
+                      </div>
+                    )}
+                  </div>
+
+                  {showJson && (
+                    <div className="space-y-4">
+                      <Card className="p-4">
+                        <pre className="text-xs whitespace-pre-wrap">
+                          {JSON.stringify({ fields, submitButtonText }, null, 2)}
+                        </pre>
+                      </Card>
+                      <Card className="p-4">
+                        <h3 className="font-semibold mb-2">Generated Schema</h3>
+                        <pre className="text-xs whitespace-pre-wrap">
+                          {fields.length > 0 ? JSON.stringify(generateZodSchema(), null, 2) : 'No fields added'}
+                        </pre>
+                      </Card>
                     </div>
                   )}
                 </div>
-
-                {showJson && (
-                  <div className="space-y-4">
-                    <Card className="p-4">
-                      <pre className="text-xs whitespace-pre-wrap">
-                        {JSON.stringify({ fields }, null, 2)}
-                      </pre>
-                    </Card>
-                    <Card className="p-4">
-                      <h3 className="font-semibold mb-2">Generated Schema</h3>
-                      <pre className="text-xs whitespace-pre-wrap">
-                        {fields.length > 0 ? JSON.stringify(generateZodSchema(), null, 2) : 'No fields added'}
-                      </pre>
-                    </Card>
-                  </div>
-                )}
               </div>
             </TabsContent>
 
@@ -337,79 +474,4 @@ export function FormBuilder({
       </DialogContent>
     </Dialog>
   );
-}
-
-function generateFormHtml(fields: FormField[]): string {
-  return `
-    <form class="space-y-4">
-      ${fields.map(field => {
-        const commonClasses = 'w-full p-2 border rounded-md';
-        const validationAttrs = field.validation?.reduce((acc, rule) => {
-          switch (rule.type) {
-            case 'required':
-              return { ...acc, required: true };
-            case 'pattern':
-              return { ...acc, pattern: rule.value };
-            case 'min':
-              return { ...acc, minlength: rule.value };
-            case 'max':
-              return { ...acc, maxlength: rule.value };
-            default:
-              return acc;
-          }
-        }, {});
-
-        const attrs = Object.entries(validationAttrs || {})
-          .map(([key, value]) => `${key}="${value}"`)
-          .join(' ');
-
-        switch (field.type) {
-          case 'text':
-          case 'email':
-          case 'number':
-            return `
-              <div class="space-y-2">
-                <label class="block text-sm font-medium">${field.label}</label>
-                <input 
-                  type="${field.type}"
-                  name="${field.name}"
-                  placeholder="${field.placeholder || ''}"
-                  class="${commonClasses}"
-                  ${attrs}
-                />
-              </div>
-            `;
-          case 'textarea':
-            return `
-              <div class="space-y-2">
-                <label class="block text-sm font-medium">${field.label}</label>
-                <textarea
-                  name="${field.name}"
-                  placeholder="${field.placeholder || ''}"
-                  class="${commonClasses}"
-                  ${attrs}
-                ></textarea>
-              </div>
-            `;
-          case 'select':
-            return `
-              <div class="space-y-2">
-                <label class="block text-sm font-medium">${field.label}</label>
-                <select name="${field.name}" class="${commonClasses}" ${attrs}>
-                  <option value="">${field.placeholder || 'Select an option'}</option>
-                  ${field.options?.map(opt => 
-                    `<option value="${opt.value}">${opt.label}</option>`
-                  ).join('')}
-                </select>
-              </div>
-            `;
-          default:
-            return '';
-        }
-      }).join('')}
-      <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
-        Submit
-      </button>
-    </form>
-  `;
 }

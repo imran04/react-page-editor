@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { FormField } from './form-builder';
 
 interface FormPreviewProps {
@@ -20,7 +22,7 @@ export function FormPreview({ fields, schema }: FormPreviewProps) {
     resolver: zodResolver(schema)
   });
 
-  const { register, formState: { errors }, trigger } = form;
+  const { register, formState: { errors }, trigger, setValue } = form;
 
   // Real-time validation
   const handleFieldChange = async (name: string) => {
@@ -45,7 +47,7 @@ export function FormPreview({ fields, schema }: FormPreviewProps) {
             ) : field.type === 'select' ? (
               <Select 
                 onValueChange={(value) => {
-                  form.setValue(field.name, value);
+                  setValue(field.name, value);
                   handleFieldChange(field.name);
                 }}
               >
@@ -62,6 +64,33 @@ export function FormPreview({ fields, schema }: FormPreviewProps) {
                   ))}
                 </SelectContent>
               </Select>
+            ) : field.type === 'checkbox' ? (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  {...register(field.name)}
+                  onCheckedChange={(checked) => {
+                    setValue(field.name, checked);
+                    handleFieldChange(field.name);
+                  }}
+                />
+                <Label>{field.placeholder}</Label>
+              </div>
+            ) : field.type === 'radio' ? (
+              <RadioGroup
+                onValueChange={(value) => {
+                  setValue(field.name, value);
+                  handleFieldChange(field.name);
+                }}
+              >
+                <div className="space-y-2">
+                  {field.options?.map(opt => (
+                    <div key={opt.value} className="flex items-center space-x-2">
+                      <RadioGroupItem value={opt.value} id={`${field.name}-${opt.value}`} />
+                      <Label htmlFor={`${field.name}-${opt.value}`}>{opt.label}</Label>
+                    </div>
+                  ))}
+                </div>
+              </RadioGroup>
             ) : (
               <Input
                 {...register(field.name)}
