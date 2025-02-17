@@ -32,8 +32,8 @@ interface FormBlockProps extends Omit<BaseBlockProps, 'children'> {
 export function FormBlock({ 
   content, 
   onContentChange,
-  attributes,
-  onAttributesChange,
+  attributes = {},
+  onAttributesChange = () => {},
   ...baseProps
 }: FormBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
