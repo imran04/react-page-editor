@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,7 +41,7 @@ export interface FormField {
   gridPosition?: {
     row: number;
     column: number;
-    width: number; // Number of columns this field spans (1-12)
+    width: number;
   };
 }
 
@@ -58,12 +58,14 @@ export function FormBuilder({
   onSave,
   initialData = []
 }: FormBuilderProps) {
-  const [fields, setFields] = useState<FormField[]>(initialData);
+  const [fields, setFields] = useState<FormField[]>(initialData.map(field => ({
+    ...field,
+    gridPosition: field.gridPosition || { row: 0, column: 0, width: 12 }
+  })));
   const [showJson, setShowJson] = useState(false);
   const [previewTab, setPreviewTab] = useState<'edit' | 'preview'>('edit');
   const [submitButtonText, setSubmitButtonText] = useState('Submit');
   const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('list');
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [parent] = useAutoAnimate();
 
   const sensors = useSensors(
@@ -100,7 +102,8 @@ export function FormBuilder({
       label: `Field ${fieldCount}`,
       name: `field_${fieldCount}`,
       placeholder: '',
-      validation: []
+      validation: [],
+      gridPosition: { row: 0, column: 0, width: 12 } //Added gridPosition
     }]);
   };
 
@@ -297,6 +300,14 @@ export function FormBuilder({
     onOpenChange(false);
   };
 
+  const handleFieldMove = useCallback((updatedField: FormField) => {
+    setFields(prev => prev.map(field =>
+      field.id === updatedField.id ? updatedField : field
+    ));
+  }, []);
+
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl">
@@ -379,6 +390,7 @@ export function FormBuilder({
                             onRemove={() => removeField(field.id)}
                             onAddValidation={(rule) => addValidation(field.id, rule)}
                             onRemoveValidation={(type) => removeValidation(field.id, type)}
+                            onFieldMove={handleFieldMove} //Pass the handleFieldMove function
                           />
                         ))}
                       </SortableContext>
@@ -411,6 +423,7 @@ export function FormBuilder({
                   fields={fields}
                   schema={generateZodSchema()}
                   layoutMode={layoutMode}
+                  onFieldMove={handleFieldMove}
                 />
               </Card>
             </TabsContent>
@@ -427,12 +440,14 @@ function SortableFieldCard({
   onRemove,
   onAddValidation,
   onRemoveValidation,
+  onFieldMove, // Added onFieldMove prop
 }: {
   field: FormField;
   onUpdate: (updates: Partial<FormField>) => void;
   onRemove: () => void;
   onAddValidation: (rule: ValidationRule) => void;
   onRemoveValidation: (type: string) => void;
+  onFieldMove: (updatedField: FormField) => void; // Added onFieldMove prop type
 }) {
   const {
     attributes,

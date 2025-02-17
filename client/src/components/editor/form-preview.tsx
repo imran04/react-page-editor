@@ -17,27 +17,27 @@ interface FormPreviewProps {
   fields: FormField[];
   schema: z.ZodObject<any>;
   layoutMode: 'list' | 'grid';
+  onFieldMove?: (field: FormField) => void;
 }
 
-export function FormPreview({ fields, schema, layoutMode }: FormPreviewProps) {
+export function FormPreview({ fields, schema, layoutMode, onFieldMove }: FormPreviewProps) {
   const form = useForm({
     resolver: zodResolver(schema)
   });
 
   const { register, formState: { errors }, trigger, setValue } = form;
-  const [fieldPositions, setFieldPositions] = useState(() =>
-    fields.reduce((acc, field) => ({
-      ...acc,
-      [field.id]: field.gridPosition || { row: 0, column: 0, width: 12 }
-    }), {})
-  );
 
-  const handleFieldMove = useCallback((id: string, position: { row: number; column: number }) => {
-    setFieldPositions(prev => ({
-      ...prev,
-      [id]: { ...prev[id], ...position }
-    }));
-  }, []);
+  const handleFieldMove = useCallback((id: string, position: { row: number; column: number; width: number }) => {
+    if (onFieldMove) {
+      const field = fields.find(f => f.id === id);
+      if (field) {
+        onFieldMove({
+          ...field,
+          gridPosition: position
+        });
+      }
+    }
+  }, [fields, onFieldMove]);
 
   // Real-time validation
   const handleFieldChange = async (name: string) => {
@@ -47,10 +47,7 @@ export function FormPreview({ fields, schema, layoutMode }: FormPreviewProps) {
   if (layoutMode === 'grid') {
     return (
       <FormGridLayout
-        fields={fields.map(field => ({
-          ...field,
-          gridPosition: fieldPositions[field.id]
-        }))}
+        fields={fields}
         onFieldMove={handleFieldMove}
       />
     );
