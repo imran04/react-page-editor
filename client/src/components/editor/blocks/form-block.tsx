@@ -52,7 +52,7 @@ export function FormBlock({
 
   const parseInitialData = () => {
     try {
-      if (attributes.formConfig?.fields) {
+      if (attributes?.formConfig?.fields) {
         return attributes.formConfig.fields;
       }
       return [];
