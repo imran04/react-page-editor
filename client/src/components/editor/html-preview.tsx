@@ -28,7 +28,7 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       setError(null);
 
       // Call the OpenAPI endpoint with the correct URL
-      const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast', {
+      const response = await fetch('https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,11 +45,13 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
       }
 
       const html = await response.text();
-
+      console.log(html);
       // Update the iframe content
-      if (iframeRef.current) {
-        iframeRef.current.srcdoc = html;
-      }
+      //if (iframeRef.current) {
+        //iframeRef.current.src = `https://localhost:7213/WeatherForecast/html/${html}`;
+        //iframeRef.current.srcDoc = html;
+        //console.log(iframeRef.current.src);
+     // }
     } catch (err) {
       console.error('Error fetching preview:', err);
       setError(err instanceof Error ? err.message : 'Error generating preview');
@@ -88,9 +90,10 @@ export function HtmlPreview({ data, open, onOpenChange }: HtmlPreviewProps) {
               ref={iframeRef}
               className="w-full h-full border-0"
               title="Page Preview"
-              sandbox="allow-same-origin allow-scripts"
+              sandbox=" allow-scripts"
               allow="encrypted-media"
-              srcDoc=""
+  
+              src="https://29tt9bw3-7213.inc1.devtunnels.ms/WeatherForecast/html/1234567890"
             />
           )}
         </div>
