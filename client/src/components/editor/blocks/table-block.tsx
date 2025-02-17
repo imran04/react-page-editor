@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { BaseBlock, BaseBlockProps } from './base-block';
-import { TextEditor } from '../text-editor';
-import { Table } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Settings2 } from 'lucide-react';
+import { TableBuilder } from '../table-builder';
 
 interface TableBlockProps extends Omit<BaseBlockProps, 'children'> {
   content: string;
@@ -12,49 +14,32 @@ export function TableBlock({
   onContentChange,
   ...baseProps
 }: TableBlockProps) {
-  const defaultTable = `
-    <table>
-      <thead>
-        <tr>
-          <th>Header 1</th>
-          <th>Header 2</th>
-          <th>Header 3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Row 1, Cell 1</td>
-          <td>Row 1, Cell 2</td>
-          <td>Row 1, Cell 3</td>
-        </tr>
-        <tr>
-          <td>Row 2, Cell 1</td>
-          <td>Row 2, Cell 2</td>
-          <td>Row 2, Cell 3</td>
-        </tr>
-      </tbody>
-    </table>
-  `;
-
-  const handleContentChange = (newContent: string) => {
-    // Ensure content is wrapped in a table tag if it isn't already
-    if (!newContent.match(/<table[^>]*>/)) {
-      newContent = defaultTable;
-    }
-    onContentChange(newContent);
-  };
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
   return (
     <BaseBlock {...baseProps}>
       <div className="space-y-4">
-        <TextEditor
-          initialContent={content || defaultTable}
-          onContentChange={handleContentChange}
-        />
-        <div className="border rounded-lg overflow-hidden">
-          <div dangerouslySetInnerHTML={{ __html: content || defaultTable }} />
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsBuilderOpen(true)}
+          >
+            <Settings2 className="h-4 w-4 mr-2" />
+            Edit Table
+          </Button>
         </div>
+        <div 
+          className="p-4 bg-muted/50 rounded-lg overflow-x-auto"
+          dangerouslySetInnerHTML={{ __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Table" to configure the table</div>' }}
+        />
       </div>
+      <TableBuilder
+        open={isBuilderOpen}
+        onOpenChange={setIsBuilderOpen}
+        onSave={onContentChange}
+        initialData={undefined} // TODO: Parse existing HTML back to table data
+      />
     </BaseBlock>
   );
 }
