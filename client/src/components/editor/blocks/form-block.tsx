@@ -1,9 +1,8 @@
+import { useState } from 'react';
 import { BaseBlock, BaseBlockProps } from './base-block';
-import { TextEditor } from '../text-editor';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Settings2 } from 'lucide-react';
+import { FormBuilder } from '../form-builder';
 
 interface FormBlockProps extends Omit<BaseBlockProps, 'children'> {
   content: string;
@@ -15,51 +14,75 @@ export function FormBlock({
   onContentChange,
   ...baseProps
 }: FormBlockProps) {
-  const defaultForm = `
-    <form>
-      <div class="space-y-4">
-        <div>
-          <label>Name</label>
-          <input type="text" placeholder="Enter your name" />
-        </div>
-        <div>
-          <label>Email</label>
-          <input type="email" placeholder="Enter your email" />
-        </div>
-        <button type="submit">Submit</button>
-      </div>
-    </form>
-  `;
+  const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
-  const handleContentChange = (newContent: string) => {
-    // Ensure content is wrapped in a form tag if it isn't already
-    if (!newContent.match(/<form[^>]*>/)) {
-      newContent = defaultForm;
-    }
-    onContentChange(newContent);
+  const handleFormSave = (formData: any) => {
+    // Convert form builder data to HTML
+    const formHtml = `
+      <form>
+        ${formData.map((item: any) => {
+          switch (item.element) {
+            case 'TextInput':
+              return `
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">${item.label}</label>
+                  <input type="text" placeholder="${item.placeholder || ''}" class="w-full p-2 border rounded" />
+                </div>
+              `;
+            case 'TextArea':
+              return `
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">${item.label}</label>
+                  <textarea placeholder="${item.placeholder || ''}" class="w-full p-2 border rounded"></textarea>
+                </div>
+              `;
+            case 'Dropdown':
+              return `
+                <div class="mb-4">
+                  <label class="block text-sm font-medium mb-1">${item.label}</label>
+                  <select class="w-full p-2 border rounded">
+                    ${item.options?.map((opt: any) => 
+                      `<option value="${opt.value}">${opt.label}</option>`
+                    ).join('')}
+                  </select>
+                </div>
+              `;
+            // Add more cases for other form elements
+            default:
+              return '';
+          }
+        }).join('')}
+        <button type="submit" class="px-4 py-2 bg-primary text-white rounded">Submit</button>
+      </form>
+    `;
+
+    onContentChange(formHtml);
   };
 
   return (
     <BaseBlock {...baseProps}>
       <div className="space-y-4">
-        <TextEditor
-          initialContent={content || defaultForm}
-          onContentChange={handleContentChange}
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsBuilderOpen(true)}
+          >
+            <Settings2 className="h-4 w-4 mr-2" />
+            Edit Form
+          </Button>
+        </div>
+        <div 
+          className="p-4 bg-muted/50 rounded-lg"
+          dangerouslySetInnerHTML={{ __html: content }}
         />
-        <Card className="p-4">
-          <div className="space-y-4">
-            <div>
-              <Label>Name</Label>
-              <Input type="text" placeholder="Enter your name" disabled />
-            </div>
-            <div>
-              <Label>Email</Label>
-              <Input type="email" placeholder="Enter your email" disabled />
-            </div>
-            <Button disabled>Submit</Button>
-          </div>
-        </Card>
       </div>
+      <FormBuilder
+        open={isBuilderOpen}
+        onOpenChange={setIsBuilderOpen}
+        onSave={handleFormSave}
+        initialData={[]} // TODO: Parse existing HTML back to form data
+      />
     </BaseBlock>
   );
 }

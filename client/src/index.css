@@ -56,3 +56,32 @@
   padding: 4px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
+/* Form Builder Overrides */
+.react-form-builder {
+  @apply bg-background;
+}
+
+.react-form-builder .form-elements-list {
+  @apply bg-card border border-border rounded-lg;
+}
+
+.react-form-builder .form-elements-list h4 {
+  @apply text-foreground font-medium;
+}
+
+.react-form-builder .form-element-item {
+  @apply bg-muted hover:bg-muted/80 text-foreground border-border;
+}
+
+.react-form-builder .toolbar-header {
+  @apply bg-card border-b border-border text-foreground;
+}
+
+.react-form-builder .form-content-section {
+  @apply bg-card border border-border rounded-lg;
+}
+
+.react-form-builder .form-content-section.empty {
+  @apply bg-muted/50;
+}
