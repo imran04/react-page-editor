@@ -1,6 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Type, Image } from 'lucide-react';
+import { 
+  Type, 
+  Image, 
+  Heading, 
+  Link2, 
+  Table, 
+  FormInput,
+  Code,
+  MousePointer2
+} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface BlockTemplate {
@@ -18,14 +27,44 @@ interface ColumnLayout {
 
 const contentBlocks: BlockTemplate[] = [
   {
+    type: 'heading',
+    icon: <Heading className="h-4 w-4" />,
+    label: 'Heading'
+  },
+  {
     type: 'text',
     icon: <Type className="h-4 w-4" />,
     label: 'Text Block'
   },
   {
+    type: 'button',
+    icon: <MousePointer2 className="h-4 w-4" />,
+    label: 'Button'
+  },
+  {
+    type: 'link',
+    icon: <Link2 className="h-4 w-4" />,
+    label: 'Link'
+  },
+  {
     type: 'image',
     icon: <Image className="h-4 w-4" />,
-    label: 'Image Block'
+    label: 'Image'
+  },
+  {
+    type: 'form',
+    icon: <FormInput className="h-4 w-4" />,
+    label: 'Form'
+  },
+  {
+    type: 'table',
+    icon: <Table className="h-4 w-4" />,
+    label: 'Table'
+  },
+  {
+    type: 'html',
+    icon: <Code className="h-4 w-4" />,
+    label: 'HTML'
   }
 ];
 
