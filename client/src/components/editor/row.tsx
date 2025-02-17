@@ -25,7 +25,7 @@ interface RowProps {
   columns: any[];
   onBlockContentChange: (columnId: string, blockId: string, content: string) => void;
   onAddBlock: (columnId: string, blockType: string) => void;
-  onAddColumn: (rowId: string) => void;
+  onAddColumn: (rowId: string,columnLayout: string) => void;
   onRemoveBlock: (columnId: string, blockId: string) => void;
   onRemoveColumn: (columnId: string) => void;
   onRemoveRow: () => void;
@@ -50,7 +50,6 @@ export function Row({
   onRemoveColumn,
   onRemoveRow,
   isSelected,
-
   onSelect,
   onColumnSelect,
   onBlockSelect,
@@ -84,7 +83,8 @@ export function Row({
     if (layoutData) {
       try {
         const layout = JSON.parse(layoutData);
-        layout.columns.forEach(() => onAddColumn(id));
+        //Fixed Column Layouts
+        layout.columns.forEach(s => onAddColumn(id,s));
       } catch (error) {
         console.error('Error parsing layout data:', error);
       }
