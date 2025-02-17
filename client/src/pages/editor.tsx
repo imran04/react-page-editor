@@ -158,18 +158,20 @@ export default function Editor() {
     return newBlockId;
   };
 
-  const handleAddColumn = (rowId: string) => {
+  const handleAddColumn = (rowId: string,colType: string) => {
     setPageData((prevData) => {
       const newRows = prevData.content.rows.map(row => {
         if (row.id === rowId) {
-          const columnCount = row.columns.length;
-          let columnType = 'col-6'; 
 
-          if (columnCount === 0) {
-            columnType = 'col-12'; 
-          } else if (columnCount === 1) {
-            row.columns[0].type = 'col-6';
-          }
+          //Fixed column layout
+          //const columnCount = row.columns.length;
+          let columnType = colType; 
+
+          // if (columnCount === 0) {
+          //   columnType = 'col-12'; 
+          // } else if (columnCount === 1) {
+          //   row.columns[0].type = 'col-6';
+          // }
 
           const newColumn = {
             id: `col-${nanoid()}`,
