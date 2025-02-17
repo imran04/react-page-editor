@@ -12,8 +12,6 @@ import { BaseBlockProps } from './base-block';
 interface BlockProps extends BaseBlockProps {
   content: string;
   onContentChange: (content: string) => void;
-  attributes: Record<string, any>;
-  onAttributesChange: (attributes: Record<string, any>) => void;
 }
 
 const blockRegistry: Record<string, ComponentType<BlockProps>> = {
