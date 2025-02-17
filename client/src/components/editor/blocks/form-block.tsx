@@ -16,49 +16,6 @@ export function FormBlock({
 }: FormBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
 
-  const handleFormSave = (formData: any) => {
-    // Convert form builder data to HTML
-    const formHtml = `
-      <form>
-        ${formData.map((item: any) => {
-          switch (item.element) {
-            case 'TextInput':
-              return `
-                <div class="mb-4">
-                  <label class="block text-sm font-medium mb-1">${item.label}</label>
-                  <input type="text" placeholder="${item.placeholder || ''}" class="w-full p-2 border rounded" />
-                </div>
-              `;
-            case 'TextArea':
-              return `
-                <div class="mb-4">
-                  <label class="block text-sm font-medium mb-1">${item.label}</label>
-                  <textarea placeholder="${item.placeholder || ''}" class="w-full p-2 border rounded"></textarea>
-                </div>
-              `;
-            case 'Dropdown':
-              return `
-                <div class="mb-4">
-                  <label class="block text-sm font-medium mb-1">${item.label}</label>
-                  <select class="w-full p-2 border rounded">
-                    ${item.options?.map((opt: any) => 
-                      `<option value="${opt.value}">${opt.label}</option>`
-                    ).join('')}
-                  </select>
-                </div>
-              `;
-            // Add more cases for other form elements
-            default:
-              return '';
-          }
-        }).join('')}
-        <button type="submit" class="px-4 py-2 bg-primary text-white rounded">Submit</button>
-      </form>
-    `;
-
-    onContentChange(formHtml);
-  };
-
   return (
     <BaseBlock {...baseProps}>
       <div className="space-y-4">
@@ -74,13 +31,13 @@ export function FormBlock({
         </div>
         <div 
           className="p-4 bg-muted/50 rounded-lg"
-          dangerouslySetInnerHTML={{ __html: content }}
+          dangerouslySetInnerHTML={{ __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' }}
         />
       </div>
       <FormBuilder
         open={isBuilderOpen}
         onOpenChange={setIsBuilderOpen}
-        onSave={handleFormSave}
+        onSave={onContentChange}
         initialData={[]} // TODO: Parse existing HTML back to form data
       />
     </BaseBlock>
