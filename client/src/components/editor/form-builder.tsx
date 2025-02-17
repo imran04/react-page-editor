@@ -6,12 +6,23 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, MoveVertical, Code, Eye } from 'lucide-react';
+import { Plus, Trash2, MoveVertical, Code, Eye, Grid2X2 } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { FormPreview } from './form-preview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
 export interface ValidationRule {
   type: 'required' | 'email' | 'min' | 'max' | 'pattern';
@@ -27,6 +38,11 @@ export interface FormField {
   placeholder?: string;
   options?: { label: string; value: string }[];
   validation?: ValidationRule[];
+  gridPosition?: {
+    row: number;
+    column: number;
+    width: number; // Number of columns this field spans (1-12)
+  };
 }
 
 interface FormBuilderProps {
@@ -36,9 +52,9 @@ interface FormBuilderProps {
   initialData?: FormField[];
 }
 
-export function FormBuilder({ 
-  open, 
-  onOpenChange, 
+export function FormBuilder({
+  open,
+  onOpenChange,
   onSave,
   initialData = []
 }: FormBuilderProps) {
@@ -46,7 +62,35 @@ export function FormBuilder({
   const [showJson, setShowJson] = useState(false);
   const [previewTab, setPreviewTab] = useState<'edit' | 'preview'>('edit');
   const [submitButtonText, setSubmitButtonText] = useState('Submit');
+  const [layoutMode, setLayoutMode] = useState<'list' | 'grid'>('list');
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [parent] = useAutoAnimate();
+
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor)
+  );
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = fields.findIndex(f => f.id === active.id);
+      const newIndex = fields.findIndex(f => f.id === over.id);
+
+      const newFields = [...fields];
+      const [removed] = newFields.splice(oldIndex, 1);
+      newFields.splice(newIndex, 0, removed);
+
+      setFields(newFields);
+    }
+
+    setActiveId(null);
+  };
 
   const addField = () => {
     const fieldCount = fields.length + 1;
@@ -65,22 +109,22 @@ export function FormBuilder({
   };
 
   const updateField = (id: string, updates: Partial<FormField>) => {
-    setFields(fields.map(field => 
+    setFields(fields.map(field =>
       field.id === id ? { ...field, ...updates } : field
     ));
   };
 
   const addValidation = (fieldId: string, rule: ValidationRule) => {
-    setFields(fields.map(field => 
-      field.id === fieldId 
+    setFields(fields.map(field =>
+      field.id === fieldId
         ? { ...field, validation: [...(field.validation || []), rule] }
         : field
     ));
   };
 
   const removeValidation = (fieldId: string, ruleType: string) => {
-    setFields(fields.map(field => 
-      field.id === fieldId 
+    setFields(fields.map(field =>
+      field.id === fieldId
         ? { ...field, validation: field.validation?.filter(rule => rule.type !== ruleType) || [] }
         : field
     ));
@@ -124,38 +168,38 @@ export function FormBuilder({
     return `
       <form class="space-y-4">
         ${fields.map(field => {
-          const commonClasses = 'w-full p-2 border rounded-md';
-          const validationAttrs = field.validation?.reduce((acc, rule) => {
-            switch (rule.type) {
-              case 'required':
-                return { ...acc, required: true };
-              case 'pattern':
-                return { ...acc, pattern: rule.value };
-              case 'min':
-                return { ...acc, minlength: rule.value };
-              case 'max':
-                return { ...acc, maxlength: rule.value };
-              default:
-                return acc;
-            }
-          }, {});
+      const commonClasses = 'w-full p-2 border rounded-md';
+      const validationAttrs = field.validation?.reduce((acc, rule) => {
+        switch (rule.type) {
+          case 'required':
+            return { ...acc, required: true };
+          case 'pattern':
+            return { ...acc, pattern: rule.value };
+          case 'min':
+            return { ...acc, minlength: rule.value };
+          case 'max':
+            return { ...acc, maxlength: rule.value };
+          default:
+            return acc;
+        }
+      }, {});
 
-          const attrs = Object.entries(validationAttrs || {})
-            .map(([key, value]) => `${key}="${value}"`)
-            .join(' ');
+      const attrs = Object.entries(validationAttrs || {})
+        .map(([key, value]) => `${key}="${value}"`)
+        .join(' ');
 
-          switch (field.type) {
-            case 'text':
-            case 'email':
-            case 'number':
-            case 'password':
-            case 'tel':
-            case 'date':
-            case 'time':
-            case 'url':
-            case 'color':
-            case 'file':
-              return `
+      switch (field.type) {
+        case 'text':
+        case 'email':
+        case 'number':
+        case 'password':
+        case 'tel':
+        case 'date':
+        case 'time':
+        case 'url':
+        case 'color':
+        case 'file':
+          return `
                 <div class="space-y-2">
                   <label class="block text-sm font-medium">${field.label}</label>
                   <input 
@@ -167,8 +211,8 @@ export function FormBuilder({
                   />
                 </div>
               `;
-            case 'textarea':
-              return `
+        case 'textarea':
+          return `
                 <div class="space-y-2">
                   <label class="block text-sm font-medium">${field.label}</label>
                   <textarea
@@ -179,20 +223,20 @@ export function FormBuilder({
                   ></textarea>
                 </div>
               `;
-            case 'select':
-              return `
+        case 'select':
+          return `
                 <div class="space-y-2">
                   <label class="block text-sm font-medium">${field.label}</label>
                   <select name="${field.name}" class="${commonClasses}" ${attrs}>
                     <option value="">${field.placeholder || 'Select an option'}</option>
-                    ${field.options?.map(opt => 
+                    ${field.options?.map(opt =>
                       `<option value="${opt.value}">${opt.label}</option>`
                     ).join('')}
                   </select>
                 </div>
               `;
-            case 'checkbox':
-              return `
+        case 'checkbox':
+          return `
                 <div class="space-y-2">
                   <label class="flex items-center gap-2">
                     <input 
@@ -205,8 +249,8 @@ export function FormBuilder({
                   </label>
                 </div>
               `;
-            case 'radio':
-              return `
+        case 'radio':
+          return `
                 <div class="space-y-2">
                   <label class="block text-sm font-medium">${field.label}</label>
                   <div class="space-y-1">
@@ -225,10 +269,10 @@ export function FormBuilder({
                   </div>
                 </div>
               `;
-            default:
-              return '';
-          }
-        }).join('')}
+        default:
+          return '';
+      }
+    }).join('')}
         <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
           ${submitButtonText}
         </button>
@@ -245,8 +289,8 @@ export function FormBuilder({
     const schema = generateZodSchema();
     const formHtml = generateFormHtml(fields);
 
-    onSave({ 
-      html: formHtml, 
+    onSave({
+      html: formHtml,
       schema: schema,
       config: formConfig
     });
@@ -260,6 +304,15 @@ export function FormBuilder({
           <DialogTitle className="flex justify-between items-center">
             <span>Form Builder</span>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLayoutMode(mode => mode === 'list' ? 'grid' : 'list')}
+                className="gap-2"
+              >
+                <Grid2X2 className="h-4 w-4" />
+                {layoutMode === 'list' ? 'Grid Layout' : 'List Layout'}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -311,135 +364,26 @@ export function FormBuilder({
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div ref={parent} className="space-y-4">
-                    {fields.map((field, index) => (
-                      <Card key={field.id} className="p-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <MoveVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-                          <div className="flex-1 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Field Type</Label>
-                                <Select
-                                  value={field.type}
-                                  onValueChange={(value: any) => updateField(field.id, { type: value })}
-                                >
-                                  <SelectTrigger>
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="text">Text</SelectItem>
-                                    <SelectItem value="textarea">Text Area</SelectItem>
-                                    <SelectItem value="select">Select</SelectItem>
-                                    <SelectItem value="number">Number</SelectItem>
-                                    <SelectItem value="email">Email</SelectItem>
-                                    <SelectItem value="password">Password</SelectItem>
-                                    <SelectItem value="tel">Telephone</SelectItem>
-                                    <SelectItem value="date">Date</SelectItem>
-                                    <SelectItem value="time">Time</SelectItem>
-                                    <SelectItem value="checkbox">Checkbox</SelectItem>
-                                    <SelectItem value="radio">Radio</SelectItem>
-                                    <SelectItem value="url">URL</SelectItem>
-                                    <SelectItem value="color">Color</SelectItem>
-                                    <SelectItem value="file">File Upload</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Label</Label>
-                                <Input
-                                  value={field.label}
-                                  onChange={(e) => updateField(field.id, { label: e.target.value })}
-                                  placeholder="Field Label"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-2">
-                                <Label>Field Name</Label>
-                                <Input
-                                  value={field.name}
-                                  onChange={(e) => updateField(field.id, { name: e.target.value })}
-                                  placeholder="Field name for form data"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Placeholder</Label>
-                                <Input
-                                  value={field.placeholder}
-                                  onChange={(e) => updateField(field.id, { placeholder: e.target.value })}
-                                  placeholder="Placeholder text"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label>Validation</Label>
-                              <div className="space-x-2">
-                                <Checkbox 
-                                  checked={field.validation?.some(rule => rule.type === 'required')}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      addValidation(field.id, { type: 'required' });
-                                    } else {
-                                      removeValidation(field.id, 'required');
-                                    }
-                                  }}
-                                />
-                                <Label>Required</Label>
-                              </div>
-                              {field.type === 'email' && (
-                                <div className="space-x-2">
-                                  <Checkbox 
-                                    checked={field.validation?.some(rule => rule.type === 'email')}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        addValidation(field.id, { type: 'email' });
-                                      } else {
-                                        removeValidation(field.id, 'email');
-                                      }
-                                    }}
-                                  />
-                                  <Label>Email Format</Label>
-                                </div>
-                              )}
-                            </div>
-
-                            {(field.type === 'select' || field.type === 'radio') && (
-                              <div className="space-y-2">
-                                <Label>Options (one per line)</Label>
-                                <Textarea
-                                  value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
-                                  onChange={(e) => {
-                                    const options = e.target.value.split('\n').map(line => {
-                                      const [label, value] = line.split('=');
-                                      return { label: label || '', value: value || label || '' };
-                                    });
-                                    updateField(field.id, { options });
-                                  }}
-                                  placeholder="Option Label=value"
-                                />
-                              </div>
-                            )}
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removeField(field.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </Card>
-                    ))}
-
-                    {fields.length === 0 && (
-                      <div className="text-center py-8 text-muted-foreground">
-                        No fields added yet. Click "Add Field" to start building your form.
-                      </div>
-                    )}
-                  </div>
+                  <DndContext
+                    sensors={sensors}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <div ref={parent} className="space-y-4">
+                      <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                        {fields.map((field) => (
+                          <SortableFieldCard
+                            key={field.id}
+                            field={field}
+                            onUpdate={(updates) => updateField(field.id, updates)}
+                            onRemove={() => removeField(field.id)}
+                            onAddValidation={(rule) => addValidation(field.id, rule)}
+                            onRemoveValidation={(type) => removeValidation(field.id, type)}
+                          />
+                        ))}
+                      </SortableContext>
+                    </div>
+                  </DndContext>
 
                   {showJson && (
                     <div className="space-y-4">
@@ -463,9 +407,10 @@ export function FormBuilder({
             <TabsContent value="preview">
               <Card className="p-4">
                 <h3 className="text-lg font-semibold mb-4">Form Preview with Live Validation</h3>
-                <FormPreview 
+                <FormPreview
                   fields={fields}
                   schema={generateZodSchema()}
+                  layoutMode={layoutMode}
                 />
               </Card>
             </TabsContent>
@@ -473,5 +418,158 @@ export function FormBuilder({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SortableFieldCard({
+  field,
+  onUpdate,
+  onRemove,
+  onAddValidation,
+  onRemoveValidation,
+}: {
+  field: FormField;
+  onUpdate: (updates: Partial<FormField>) => void;
+  onRemove: () => void;
+  onAddValidation: (rule: ValidationRule) => void;
+  onRemoveValidation: (type: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: field.id });
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+    zIndex: isDragging ? 1 : undefined,
+  };
+
+  return (
+    <div {...attributes} {...listeners} ref={setNodeRef} style={style}>
+      <Card className="p-4">
+        <div className="flex items-center gap-2 mb-4">
+          <MoveVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+          <div className="flex-1 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Field Type</Label>
+                <Select
+                  value={field.type}
+                  onValueChange={(value: any) => onUpdate({ type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="text">Text</SelectItem>
+                    <SelectItem value="textarea">Text Area</SelectItem>
+                    <SelectItem value="select">Select</SelectItem>
+                    <SelectItem value="number">Number</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="password">Password</SelectItem>
+                    <SelectItem value="tel">Telephone</SelectItem>
+                    <SelectItem value="date">Date</SelectItem>
+                    <SelectItem value="time">Time</SelectItem>
+                    <SelectItem value="checkbox">Checkbox</SelectItem>
+                    <SelectItem value="radio">Radio</SelectItem>
+                    <SelectItem value="url">URL</SelectItem>
+                    <SelectItem value="color">Color</SelectItem>
+                    <SelectItem value="file">File Upload</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Label</Label>
+                <Input
+                  value={field.label}
+                  onChange={(e) => onUpdate({ label: e.target.value })}
+                  placeholder="Field Label"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Field Name</Label>
+                <Input
+                  value={field.name}
+                  onChange={(e) => onUpdate({ name: e.target.value })}
+                  placeholder="Field name for form data"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Placeholder</Label>
+                <Input
+                  value={field.placeholder}
+                  onChange={(e) => onUpdate({ placeholder: e.target.value })}
+                  placeholder="Placeholder text"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Validation</Label>
+              <div className="space-x-2">
+                <Checkbox
+                  checked={field.validation?.some(rule => rule.type === 'required')}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      onAddValidation({ type: 'required' });
+                    } else {
+                      onRemoveValidation('required');
+                    }
+                  }}
+                />
+                <Label>Required</Label>
+              </div>
+              {field.type === 'email' && (
+                <div className="space-x-2">
+                  <Checkbox
+                    checked={field.validation?.some(rule => rule.type === 'email')}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        onAddValidation({ type: 'email' });
+                      } else {
+                        onRemoveValidation('email');
+                      }
+                    }}
+                  />
+                  <Label>Email Format</Label>
+                </div>
+              )}
+            </div>
+
+            {(field.type === 'select' || field.type === 'radio') && (
+              <div className="space-y-2">
+                <Label>Options (one per line)</Label>
+                <Textarea
+                  value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
+                  onChange={(e) => {
+                    const options = e.target.value.split('\n').map(line => {
+                      const [label, value] = line.split('=');
+                      return { label: label || '', value: value || label || '' };
+                    });
+                    onUpdate({ options });
+                  }}
+                  placeholder="Option Label=value"
+                />
+              </div>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onRemove}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </Card>
+    </div>
   );
 }

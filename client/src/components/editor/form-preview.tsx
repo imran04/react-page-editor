@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card } from '@/components/ui/card';
@@ -11,23 +11,50 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { FormField } from './form-builder';
+import { FormGridLayout } from './form-grid-layout';
 
 interface FormPreviewProps {
   fields: FormField[];
   schema: z.ZodObject<any>;
+  layoutMode: 'list' | 'grid';
 }
 
-export function FormPreview({ fields, schema }: FormPreviewProps) {
+export function FormPreview({ fields, schema, layoutMode }: FormPreviewProps) {
   const form = useForm({
     resolver: zodResolver(schema)
   });
 
   const { register, formState: { errors }, trigger, setValue } = form;
+  const [fieldPositions, setFieldPositions] = useState(() =>
+    fields.reduce((acc, field) => ({
+      ...acc,
+      [field.id]: field.gridPosition || { row: 0, column: 0, width: 12 }
+    }), {})
+  );
+
+  const handleFieldMove = useCallback((id: string, position: { row: number; column: number }) => {
+    setFieldPositions(prev => ({
+      ...prev,
+      [id]: { ...prev[id], ...position }
+    }));
+  }, []);
 
   // Real-time validation
   const handleFieldChange = async (name: string) => {
     await trigger(name);
   };
+
+  if (layoutMode === 'grid') {
+    return (
+      <FormGridLayout
+        fields={fields.map(field => ({
+          ...field,
+          gridPosition: fieldPositions[field.id]
+        }))}
+        onFieldMove={handleFieldMove}
+      />
+    );
+  }
 
   return (
     <Card className="p-4">
@@ -45,7 +72,7 @@ export function FormPreview({ fields, schema }: FormPreviewProps) {
                 onChange={() => handleFieldChange(field.name)}
               />
             ) : field.type === 'select' ? (
-              <Select 
+              <Select
                 onValueChange={(value) => {
                   setValue(field.name, value);
                   handleFieldChange(field.name);
