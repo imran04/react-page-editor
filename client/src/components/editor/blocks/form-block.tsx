@@ -4,6 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Settings2 } from 'lucide-react';
 import { FormBuilder } from '../form-builder';
 
+interface FormData {
+  html: string;
+  schema: any;
+  config: any;
+}
+
 interface FormBlockProps extends Omit<BaseBlockProps, 'children'> {
   content: string;
   onContentChange: (content: string) => void;
@@ -15,6 +21,23 @@ export function FormBlock({
   ...baseProps
 }: FormBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [formData, setFormData] = useState<FormData | null>(null);
+
+  const handleSave = (data: FormData) => {
+    setFormData(data);
+    onContentChange(data.html);
+  };
+
+  const parseInitialData = () => {
+    try {
+      if (formData) {
+        return formData.config.fields;
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  };
 
   return (
     <BaseBlock {...baseProps}>
@@ -31,14 +54,16 @@ export function FormBlock({
         </div>
         <div 
           className="p-4 bg-muted/50 rounded-lg"
-          dangerouslySetInnerHTML={{ __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' }}
+          dangerouslySetInnerHTML={{ 
+            __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Form" to configure the form</div>' 
+          }}
         />
       </div>
       <FormBuilder
         open={isBuilderOpen}
         onOpenChange={setIsBuilderOpen}
-        onSave={onContentChange}
-        initialData={[]} // TODO: Parse existing HTML back to form data
+        onSave={handleSave}
+        initialData={parseInitialData()}
       />
     </BaseBlock>
   );

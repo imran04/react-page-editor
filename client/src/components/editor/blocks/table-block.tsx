@@ -4,6 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Settings2 } from 'lucide-react';
 import { TableBuilder } from '../table-builder';
 
+interface TableData {
+  html: string;
+  config: any;
+}
+
 interface TableBlockProps extends Omit<BaseBlockProps, 'children'> {
   content: string;
   onContentChange: (content: string) => void;
@@ -15,6 +20,12 @@ export function TableBlock({
   ...baseProps
 }: TableBlockProps) {
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
+  const [tableData, setTableData] = useState<TableData | null>(null);
+
+  const handleSave = (data: TableData) => {
+    setTableData(data);
+    onContentChange(data.html);
+  };
 
   return (
     <BaseBlock {...baseProps}>
@@ -37,8 +48,8 @@ export function TableBlock({
       <TableBuilder
         open={isBuilderOpen}
         onOpenChange={setIsBuilderOpen}
-        onSave={onContentChange}
-        initialData={undefined} // TODO: Parse existing HTML back to table data
+        onSave={handleSave}
+        initialData={tableData?.config}
       />
     </BaseBlock>
   );
