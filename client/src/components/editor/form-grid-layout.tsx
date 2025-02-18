@@ -2,11 +2,9 @@ import { useCallback, useState } from 'react';
 import { useDndMonitor, DndContext, DragOverlay, useDraggable, useDroppable } from '@dnd-kit/core';
 import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
-import { Card } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Card, Form } from 'react-bootstrap';
 import { FormField } from './form-builder';
-import { Button } from '@/components/ui/button';
+import { Button } from 'react-bootstrap';
 import { GripHorizontal } from 'lucide-react';
 
 interface FormGridLayoutProps {
@@ -25,8 +23,8 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
     gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(0, 1fr))`,
     gap: '1rem',
     padding: '1rem',
-    background: 'hsl(var(--muted))',
-    borderRadius: 'calc(var(--radius) - 2px)',
+    background: '#f8f9fa',
+    borderRadius: '0.375rem',
     minHeight: '400px',
   };
 
@@ -90,7 +88,7 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
 
       <DragOverlay>
         {activeId ? (
-          <Card className="p-4 w-64 opacity-80">
+          <Card className="p-4" style={{ width: '16rem', opacity: 0.8 }}>
             {fields.find(f => f.id === activeId)?.label}
           </Card>
         ) : null}
@@ -109,12 +107,12 @@ function GridCell({ id, row, column }: { id: string; row: number; column: number
       ref={setNodeRef}
       style={{
         height: CELL_SIZE,
-        border: '1px dashed hsl(var(--border))',
-        borderRadius: 'var(--radius)',
+        border: '1px dashed var(--bs-border-color)',
+        borderRadius: '0.375rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: isOver ? 'hsl(var(--accent))' : undefined,
+        backgroundColor: isOver ? 'var(--bs-primary-bg-subtle)' : undefined,
         opacity: isOver ? 0.5 : undefined,
         transition: 'background-color 0.2s, opacity 0.2s',
       }}
@@ -146,32 +144,33 @@ function FormFieldItem({ field, gridPosition, onWidthChange }: FormFieldItemProp
       className="p-4"
       {...attributes}
     >
-      <div className="flex items-center justify-between gap-4 mb-2">
+      <div className="d-flex align-items-center justify-content-between gap-4 mb-2">
         <div {...listeners} className="cursor-move">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
+          <GripHorizontal className="h-4 w-4 text-muted" />
         </div>
         <div className="flex-1">
-          <Label>{field.label}</Label>
+          <Form.Label>{field.label}</Form.Label>
           {field.placeholder && (
-            <p className="text-sm text-muted-foreground">{field.placeholder}</p>
+            <p className="text-muted small">{field.placeholder}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          <Label className="text-sm">Width</Label>
-          <Input
+        <div className="d-flex align-items-center gap-2">
+          <Form.Label className="small">Width</Form.Label>
+          <Form.Control
             type="number"
             min="1"
             max="12"
             value={gridPosition.width}
             onChange={(e) => onWidthChange(Math.min(12, Math.max(1, parseInt(e.target.value) || 1)))}
             className="w-16"
+            size="sm"
           />
         </div>
       </div>
 
       {/* Field preview */}
       <div className="opacity-50">
-        {field.type === 'text' && <Input disabled placeholder={field.placeholder} />}
+        {field.type === 'text' && <Form.Control disabled placeholder={field.placeholder} />}
         {/* Add more field type previews as needed */}
       </div>
     </Card>

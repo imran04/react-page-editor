@@ -1,17 +1,9 @@
 import { useState, useCallback } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
+import { Modal, Button, Form, Card, Nav, Tab } from 'react-bootstrap';
 import { Plus, Trash2, MoveVertical, Code, Eye, Grid2X2 } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { z } from 'zod';
 import { FormPreview } from './form-preview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DndContext,
   DragEndEvent,
@@ -103,7 +95,7 @@ export function FormBuilder({
       name: `field_${fieldCount}`,
       placeholder: '',
       validation: [],
-      gridPosition: { row: 0, column: 0, width: 12 } //Added gridPosition
+      gridPosition: { row: 0, column: 0, width: 12 }
     }]);
   };
 
@@ -309,116 +301,121 @@ export function FormBuilder({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
-        <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
-            <span>Form Builder</span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLayoutMode(mode => mode === 'list' ? 'grid' : 'list')}
-                className="gap-2"
-              >
-                <Grid2X2 className="h-4 w-4" />
-                {layoutMode === 'list' ? 'Grid Layout' : 'List Layout'}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowJson(!showJson)}
-                className="gap-2"
-              >
-                <Code className="h-4 w-4" />
-                {showJson ? 'Hide' : 'Show'} JSON
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPreviewTab(previewTab === 'edit' ? 'preview' : 'edit')}
-                className="gap-2"
-              >
-                <Eye className="h-4 w-4" />
-                {previewTab === 'edit' ? 'Show Preview' : 'Hide Preview'}
-              </Button>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave}>Save Form</Button>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
+    <Modal show={open} onHide={() => onOpenChange(false)} size="xl">
+      <Modal.Header>
+        <Modal.Title className="d-flex justify-content-between align-items-center w-100">
+          <span>Form Builder</span>
+          <div className="d-flex gap-2">
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => setLayoutMode(mode => mode === 'list' ? 'grid' : 'list')}
+              className="d-flex align-items-center gap-2"
+            >
+              <Grid2X2 className="h-4 w-4" />
+              {layoutMode === 'list' ? 'Grid Layout' : 'List Layout'}
+            </Button>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => setShowJson(!showJson)}
+              className="d-flex align-items-center gap-2"
+            >
+              <Code className="h-4 w-4" />
+              {showJson ? 'Hide' : 'Show'} JSON
+            </Button>
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => setPreviewTab(previewTab === 'edit' ? 'preview' : 'edit')}
+              className="d-flex align-items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              {previewTab === 'edit' ? 'Show Preview' : 'Hide Preview'}
+            </Button>
+            <Button variant="outline-secondary" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSave}>Save Form</Button>
+          </div>
+        </Modal.Title>
+      </Modal.Header>
 
-        <div className="py-4">
-          <Tabs value={previewTab} onValueChange={(value: string) => setPreviewTab(value as 'edit' | 'preview')}>
-            <TabsList className="mb-4">
-              <TabsTrigger value="edit">Edit Form</TabsTrigger>
-              <TabsTrigger value="preview">Live Preview</TabsTrigger>
-            </TabsList>
+      <Modal.Body className="py-4">
+        <Tab.Container activeKey={previewTab} onSelect={(k) => setPreviewTab(k as 'edit' | 'preview')}>
+          <Nav variant="tabs" className="mb-4">
+            <Nav.Item>
+              <Nav.Link eventKey="edit">Edit Form</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="preview">Live Preview</Nav.Link>
+            </Nav.Item>
+          </Nav>
 
-            <TabsContent value="edit">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="space-y-2">
-                    <Label>Submit Button Text</Label>
-                    <Input
+          <Tab.Content>
+            <Tab.Pane eventKey="edit">
+              <div className="d-flex flex-column gap-4">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div className="d-flex flex-column gap-2">
+                    <Form.Label>Submit Button Text</Form.Label>
+                    <Form.Control
                       value={submitButtonText}
                       onChange={(e) => setSubmitButtonText(e.target.value)}
                       placeholder="Submit button text"
                     />
                   </div>
-                  <Button onClick={addField} className="gap-2">
+                  <Button onClick={addField} className="d-flex align-items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Add Field
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="row">
                   <DndContext
                     sensors={sensors}
                     onDragStart={handleDragStart}
                     onDragEnd={handleDragEnd}
                   >
-                    <div ref={parent} className="space-y-4">
-                      <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                        {fields.map((field) => (
-                          <SortableFieldCard
-                            key={field.id}
-                            field={field}
-                            onUpdate={(updates) => updateField(field.id, updates)}
-                            onRemove={() => removeField(field.id)}
-                            onAddValidation={(rule) => addValidation(field.id, rule)}
-                            onRemoveValidation={(type) => removeValidation(field.id, type)}
-                            onFieldMove={handleFieldMove} //Pass the handleFieldMove function
-                          />
-                        ))}
-                      </SortableContext>
+                    <div ref={parent} className={showJson ? 'col-lg-6' : 'col-12'}>
+                      <Card className="p-4">
+                        <SortableContext items={fields.map(f => f.id)} strategy={verticalListSortingStrategy}>
+                          {fields.map((field) => (
+                            <SortableFieldCard
+                              key={field.id}
+                              field={field}
+                              onUpdate={(updates) => updateField(field.id, updates)}
+                              onRemove={() => removeField(field.id)}
+                              onAddValidation={(rule) => addValidation(field.id, rule)}
+                              onRemoveValidation={(type) => removeValidation(field.id, type)}
+                              onFieldMove={handleFieldMove}
+                            />
+                          ))}
+                        </SortableContext>
+                      </Card>
                     </div>
+                    {showJson && (
+                      <div className="col-lg-6">
+                        <Card className="p-4">
+                          <pre className="small">
+                            {JSON.stringify({ fields, submitButtonText }, null, 2)}
+                          </pre>
+                        </Card>
+                        <Card className="mt-4 p-4">
+                          <h3 className="fw-semibold mb-2">Generated Schema</h3>
+                          <pre className="small">
+                            {fields.length > 0 ? JSON.stringify(generateZodSchema(), null, 2) : 'No fields added'}
+                          </pre>
+                        </Card>
+                      </div>
+                    )}
                   </DndContext>
-
-                  {showJson && (
-                    <div className="space-y-4">
-                      <Card className="p-4">
-                        <pre className="text-xs whitespace-pre-wrap">
-                          {JSON.stringify({ fields, submitButtonText }, null, 2)}
-                        </pre>
-                      </Card>
-                      <Card className="p-4">
-                        <h3 className="font-semibold mb-2">Generated Schema</h3>
-                        <pre className="text-xs whitespace-pre-wrap">
-                          {fields.length > 0 ? JSON.stringify(generateZodSchema(), null, 2) : 'No fields added'}
-                        </pre>
-                      </Card>
-                    </div>
-                  )}
                 </div>
               </div>
-            </TabsContent>
+            </Tab.Pane>
 
-            <TabsContent value="preview">
+            <Tab.Pane eventKey="preview">
               <Card className="p-4">
-                <h3 className="text-lg font-semibold mb-4">Form Preview with Live Validation</h3>
+                <h3 className="fs-4 fw-semibold mb-4">Form Preview with Live Validation</h3>
                 <FormPreview
                   fields={fields}
                   schema={generateZodSchema()}
@@ -426,11 +423,11 @@ export function FormBuilder({
                   onFieldMove={handleFieldMove}
                 />
               </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
+            </Tab.Pane>
+          </Tab.Content>
+        </Tab.Container>
+      </Modal.Body>
+    </Modal>
   );
 }
 
@@ -440,14 +437,14 @@ function SortableFieldCard({
   onRemove,
   onAddValidation,
   onRemoveValidation,
-  onFieldMove, // Added onFieldMove prop
+  onFieldMove,
 }: {
   field: FormField;
   onUpdate: (updates: Partial<FormField>) => void;
   onRemove: () => void;
   onAddValidation: (rule: ValidationRule) => void;
   onRemoveValidation: (type: string) => void;
-  onFieldMove: (updatedField: FormField) => void; // Added onFieldMove prop type
+  onFieldMove: (updatedField: FormField) => void;
 }) {
   const {
     attributes,
@@ -466,120 +463,127 @@ function SortableFieldCard({
 
   return (
     <div {...attributes} {...listeners} ref={setNodeRef} style={style}>
-      <Card className="p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <MoveVertical className="h-4 w-4 text-muted-foreground cursor-move" />
-          <div className="flex-1 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Field Type</Label>
-                <Select
-                  value={field.type}
-                  onValueChange={(value: any) => onUpdate({ type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text">Text</SelectItem>
-                    <SelectItem value="textarea">Text Area</SelectItem>
-                    <SelectItem value="select">Select</SelectItem>
-                    <SelectItem value="number">Number</SelectItem>
-                    <SelectItem value="email">Email</SelectItem>
-                    <SelectItem value="password">Password</SelectItem>
-                    <SelectItem value="tel">Telephone</SelectItem>
-                    <SelectItem value="date">Date</SelectItem>
-                    <SelectItem value="time">Time</SelectItem>
-                    <SelectItem value="checkbox">Checkbox</SelectItem>
-                    <SelectItem value="radio">Radio</SelectItem>
-                    <SelectItem value="url">URL</SelectItem>
-                    <SelectItem value="color">Color</SelectItem>
-                    <SelectItem value="file">File Upload</SelectItem>
-                  </SelectContent>
-                </Select>
+      <Card className="p-4 mb-3">
+        <div className="d-flex align-items-center gap-2 mb-4">
+          <MoveVertical className="h-4 w-4 text-muted cursor-move" />
+          <div className="flex-1">
+            <div className="row g-4">
+              <div className="col-6">
+                <Form.Group>
+                  <Form.Label>Field Type</Form.Label>
+                  <Form.Select
+                    value={field.type}
+                    onChange={(e) => onUpdate({ type: e.target.value as any })}
+                  >
+                    <option value="text">Text</option>
+                    <option value="textarea">Text Area</option>
+                    <option value="select">Select</option>
+                    <option value="number">Number</option>
+                    <option value="email">Email</option>
+                    <option value="password">Password</option>
+                    <option value="tel">Telephone</option>
+                    <option value="date">Date</option>
+                    <option value="time">Time</option>
+                    <option value="checkbox">Checkbox</option>
+                    <option value="radio">Radio</option>
+                    <option value="url">URL</option>
+                    <option value="color">Color</option>
+                    <option value="file">File Upload</option>
+                  </Form.Select>
+                </Form.Group>
               </div>
-              <div className="space-y-2">
-                <Label>Label</Label>
-                <Input
-                  value={field.label}
-                  onChange={(e) => onUpdate({ label: e.target.value })}
-                  placeholder="Field Label"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Field Name</Label>
-                <Input
-                  value={field.name}
-                  onChange={(e) => onUpdate({ name: e.target.value })}
-                  placeholder="Field name for form data"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Placeholder</Label>
-                <Input
-                  value={field.placeholder}
-                  onChange={(e) => onUpdate({ placeholder: e.target.value })}
-                  placeholder="Placeholder text"
-                />
+              <div className="col-6">
+                <Form.Group>
+                  <Form.Label>Label</Form.Label>
+                  <Form.Control
+                    value={field.label}
+                    onChange={(e) => onUpdate({ label: e.target.value })}
+                    placeholder="Field Label"
+                  />
+                </Form.Group>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Validation</Label>
-              <div className="space-x-2">
-                <Checkbox
+            <div className="row g-4 mt-2">
+              <div className="col-6">
+                <Form.Group>
+                  <Form.Label>Field Name</Form.Label>
+                  <Form.Control
+                    value={field.name}
+                    onChange={(e) => onUpdate({ name: e.target.value })}
+                    placeholder="Field name for form data"
+                  />
+                </Form.Group>
+              </div>
+              <div className="col-6">
+                <Form.Group>
+                  <Form.Label>Placeholder</Form.Label>
+                  <Form.Control
+                    value={field.placeholder}
+                    onChange={(e) => onUpdate({ placeholder: e.target.value })}
+                    placeholder="Placeholder text"
+                  />
+                </Form.Group>
+              </div>
+            </div>
+
+            <div className="mt-3">
+              <Form.Label>Validation</Form.Label>
+              <div className="d-flex gap-3">
+                <Form.Check
+                  type="checkbox"
+                  label="Required"
                   checked={field.validation?.some(rule => rule.type === 'required')}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
+                  onChange={(e) => {
+                    if (e.target.checked) {
                       onAddValidation({ type: 'required' });
                     } else {
                       onRemoveValidation('required');
                     }
                   }}
                 />
-                <Label>Required</Label>
-              </div>
-              {field.type === 'email' && (
-                <div className="space-x-2">
-                  <Checkbox
+                {field.type === 'email' && (
+                  <Form.Check
+                    type="checkbox"
+                    label="Email Format"
                     checked={field.validation?.some(rule => rule.type === 'email')}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
+                    onChange={(e) => {
+                      if (e.target.checked) {
                         onAddValidation({ type: 'email' });
                       } else {
                         onRemoveValidation('email');
                       }
                     }}
                   />
-                  <Label>Email Format</Label>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {(field.type === 'select' || field.type === 'radio') && (
-              <div className="space-y-2">
-                <Label>Options (one per line)</Label>
-                <Textarea
-                  value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
-                  onChange={(e) => {
-                    const options = e.target.value.split('\n').map(line => {
-                      const [label, value] = line.split('=');
-                      return { label: label || '', value: value || label || '' };
-                    });
-                    onUpdate({ options });
-                  }}
-                  placeholder="Option Label=value"
-                />
+              <div className="mt-3">
+                <Form.Group>
+                  <Form.Label>Options (one per line)</Form.Label>
+                  <Form.Control
+                    as="textarea"
+                    value={field.options?.map(opt => `${opt.label}=${opt.value}`).join('\n') || ''}
+                    onChange={(e) => {
+                      const options = e.target.value.split('\n').map(line => {
+                        const [label, value] = line.split('=');
+                        return { label: label || '', value: value || label || '' };
+                      });
+                      onUpdate({ options });
+                    }}
+                    placeholder="Option Label=value"
+                  />
+                </Form.Group>
               </div>
             )}
           </div>
           <Button
-            variant="ghost"
-            size="icon"
+            variant="link"
+            size="sm"
             onClick={onRemove}
+            className="p-0"
           >
             <Trash2 className="h-4 w-4" />
           </Button>

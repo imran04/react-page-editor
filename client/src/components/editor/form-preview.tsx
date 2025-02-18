@@ -1,17 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { cn } from '@/lib/utils';
-import { z } from 'zod';
+import { Card, Form } from 'react-bootstrap';
 import { FormField } from './form-builder';
 import { FormGridLayout } from './form-grid-layout';
+import { z } from 'zod';
 
 interface FormPreviewProps {
   fields: FormField[];
@@ -39,7 +32,6 @@ export function FormPreview({ fields, schema, layoutMode, onFieldMove }: FormPre
     }
   }, [fields, onFieldMove]);
 
-  // Real-time validation
   const handleFieldChange = async (name: string) => {
     await trigger(name);
   };
@@ -55,85 +47,76 @@ export function FormPreview({ fields, schema, layoutMode, onFieldMove }: FormPre
 
   return (
     <Card className="p-4">
-      <form className="space-y-4">
+      <Form className="d-flex flex-column gap-4">
         {fields.map(field => (
-          <div key={field.id} className="space-y-2">
-            <Label>{field.label}</Label>
-            {field.type === 'textarea' ? (
-              <Textarea
-                {...register(field.name)}
-                placeholder={field.placeholder}
-                className={cn(
-                  errors[field.name] && 'border-destructive'
-                )}
-                onChange={() => handleFieldChange(field.name)}
-              />
-            ) : field.type === 'select' ? (
-              <Select
-                onValueChange={(value) => {
-                  setValue(field.name, value);
-                  handleFieldChange(field.name);
-                }}
-              >
-                <SelectTrigger className={cn(
-                  errors[field.name] && 'border-destructive'
-                )}>
-                  <SelectValue placeholder={field.placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {field.options?.map(opt => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : field.type === 'checkbox' ? (
-              <div className="flex items-center space-x-2">
-                <Checkbox
+          <div key={field.id}>
+            <Form.Group>
+              <Form.Label>{field.label}</Form.Label>
+              {field.type === 'textarea' ? (
+                <Form.Control
+                  as="textarea"
                   {...register(field.name)}
-                  onCheckedChange={(checked) => {
-                    setValue(field.name, checked);
+                  placeholder={field.placeholder}
+                  className={errors[field.name] ? 'border-danger' : ''}
+                  onChange={() => handleFieldChange(field.name)}
+                />
+              ) : field.type === 'select' ? (
+                <Form.Select
+                  {...register(field.name)}
+                  onChange={(e) => {
+                    setValue(field.name, e.target.value);
+                    handleFieldChange(field.name);
+                  }}
+                  className={errors[field.name] ? 'border-danger' : ''}
+                >
+                  <option value="">{field.placeholder || 'Select an option'}</option>
+                  {field.options?.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </Form.Select>
+              ) : field.type === 'checkbox' ? (
+                <Form.Check
+                  type="checkbox"
+                  label={field.placeholder}
+                  {...register(field.name)}
+                  onChange={(e) => {
+                    setValue(field.name, e.target.checked);
                     handleFieldChange(field.name);
                   }}
                 />
-                <Label>{field.placeholder}</Label>
-              </div>
-            ) : field.type === 'radio' ? (
-              <RadioGroup
-                onValueChange={(value) => {
-                  setValue(field.name, value);
-                  handleFieldChange(field.name);
-                }}
-              >
-                <div className="space-y-2">
+              ) : field.type === 'radio' ? (
+                <div>
                   {field.options?.map(opt => (
-                    <div key={opt.value} className="flex items-center space-x-2">
-                      <RadioGroupItem value={opt.value} id={`${field.name}-${opt.value}`} />
-                      <Label htmlFor={`${field.name}-${opt.value}`}>{opt.label}</Label>
-                    </div>
+                    <Form.Check
+                      key={opt.value}
+                      type="radio"
+                      label={opt.label}
+                      value={opt.value}
+                      {...register(field.name)}
+                      onChange={() => handleFieldChange(field.name)}
+                    />
                   ))}
                 </div>
-              </RadioGroup>
-            ) : (
-              <Input
-                {...register(field.name)}
-                type={field.type}
-                placeholder={field.placeholder}
-                className={cn(
-                  errors[field.name] && 'border-destructive'
-                )}
-                onChange={() => handleFieldChange(field.name)}
-              />
-            )}
-            {errors[field.name] && (
-              <p className="text-sm text-destructive">
-                {errors[field.name]?.message as string}
-              </p>
-            )}
+              ) : (
+                <Form.Control
+                  type={field.type}
+                  {...register(field.name)}
+                  placeholder={field.placeholder}
+                  className={errors[field.name] ? 'border-danger' : ''}
+                  onChange={() => handleFieldChange(field.name)}
+                />
+              )}
+              {errors[field.name] && (
+                <Form.Text className="text-danger">
+                  {errors[field.name]?.message as string}
+                </Form.Text>
+              )}
+            </Form.Group>
           </div>
         ))}
-      </form>
+      </Form>
     </Card>
   );
 }
