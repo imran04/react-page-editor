@@ -124,8 +124,11 @@ export function Column({
             content.map(block => {
               const BlockComponent = getBlockComponent(block.blocktype);
               if (!BlockComponent) {
-                console.warn(`Block type ${block.blocktype} not found`);
-                return null;
+                return (
+                  <div key={block.id} className="p-2 bg-warning/10 text-warning">
+                    Unknown block type: {block.blocktype}
+                  </div>
+                );
               }
 
               return (
@@ -140,6 +143,7 @@ export function Column({
                   showBorders={showBorders}
                   content={block.innerHtmlOrText}
                   onContentChange={(content: string) => onBlockContentChange(id, block.id, content)}
+                  onAttributesChange={() => {}} 
                 />
               );
             })

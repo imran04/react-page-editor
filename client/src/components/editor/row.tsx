@@ -70,7 +70,7 @@ export function Row({
     transform: CSS.Transform.toString(transform),
     transition
   };
-  
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -83,10 +83,10 @@ export function Row({
     if (layoutData) {
       try {
         const layout = JSON.parse(layoutData);
-        //Fixed Column Layouts
-        layout.columns.forEach(s => onAddColumn(id,s));
-      } catch (error) {
-        console.error('Error parsing layout data:', error);
+        layout.columns.forEach((s: string) => onAddColumn(id, s));
+      } catch {
+        // Silently handle parsing errors
+        return;
       }
     }
   };

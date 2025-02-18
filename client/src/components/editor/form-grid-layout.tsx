@@ -10,12 +10,14 @@ import { GripHorizontal } from 'lucide-react';
 interface FormGridLayoutProps {
   fields: FormField[];
   onFieldMove: (id: string, position: { row: number; column: number; width: number }) => void;
+  onAddBlock: (id: string, blockType: string) => void; // Assumed to exist
+  onAddColumn: (id: string, column: string) => void; // Assumed to exist
 }
 
 const GRID_COLUMNS = 12;
 const CELL_SIZE = 64; // pixels
 
-export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
+export function FormGridLayout({ fields, onFieldMove, onAddBlock, onAddColumn }: FormGridLayoutProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const gridStyle = {
@@ -37,8 +39,8 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
       const [_, row, col] = over.id.split('-').map(Number);
       const field = fields.find(f => f.id === fieldId);
       if (field) {
-        onFieldMove(fieldId, { 
-          row, 
+        onFieldMove(fieldId, {
+          row,
           column: col,
           width: field.gridPosition?.width || 1
         });
@@ -50,6 +52,30 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
   const handleDragStart = useCallback((event: any) => {
     setActiveId(event.active.id);
   }, []);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.add('bg-primary/10');
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('bg-primary/10');
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.currentTarget.classList.remove('bg-primary/10');
+
+    const blockType = e.dataTransfer.getData('blockType');
+    if (blockType) {
+      onAddBlock(e.currentTarget.id, blockType); // Assuming id is available on the target
+    }
+  };
+
 
   return (
     <DndContext
@@ -66,6 +92,9 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
               id={`cell-${row}-${col}`}
               row={row}
               column={col}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
             />
           ))
         )}
@@ -76,7 +105,7 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
             key={field.id}
             field={field}
             gridPosition={field.gridPosition || { row: 0, column: 0, width: 12 }}
-            onWidthChange={(width) => 
+            onWidthChange={(width) =>
               onFieldMove(field.id, {
                 ...field.gridPosition!,
                 width
@@ -97,7 +126,7 @@ export function FormGridLayout({ fields, onFieldMove }: FormGridLayoutProps) {
   );
 }
 
-function GridCell({ id, row, column }: { id: string; row: number; column: number }) {
+function GridCell({ id, row, column, onDragOver, onDragLeave, onDrop }: { id: string; row: number; column: number; onDragOver: (e: React.DragEvent) => void; onDragLeave: (e: React.DragEvent) => void; onDrop: (e: React.DragEvent) => void; }) {
   const { setNodeRef, isOver } = useDroppable({
     id,
   });
@@ -116,6 +145,9 @@ function GridCell({ id, row, column }: { id: string; row: number; column: number
         opacity: isOver ? 0.5 : undefined,
         transition: 'background-color 0.2s, opacity 0.2s',
       }}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
     />
   );
 }
