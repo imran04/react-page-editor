@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BaseBlock, BaseBlockProps } from './base-block';
-import { Button } from '@/components/ui/button';
+import { Button } from 'react-bootstrap';
 import { Settings2 } from 'lucide-react';
 import { TableBuilder } from '../table-builder';
 
@@ -29,20 +29,22 @@ export function TableBlock({
 
   return (
     <BaseBlock {...baseProps}>
-      <div className="space-y-4">
-        <div className="flex justify-end">
+      <div className="d-flex flex-column gap-3">
+        <div className="d-flex justify-content-end">
           <Button
-            variant="outline"
+            variant="outline-secondary"
             size="sm"
             onClick={() => setIsBuilderOpen(true)}
           >
-            <Settings2 className="h-4 w-4 mr-2" />
+            <Settings2 className="h-4 w-4 me-2" />
             Edit Table
           </Button>
         </div>
         <div 
-          className="p-4 bg-muted/50 rounded-lg overflow-x-auto"
-          dangerouslySetInnerHTML={{ __html: content || '<div class="text-muted-foreground text-center py-4">Click "Edit Table" to configure the table</div>' }}
+          className="p-3 bg-light rounded"
+          dangerouslySetInnerHTML={{ 
+            __html: content || '<div class="text-muted text-center py-4">Click "Edit Table" to configure the table</div>' 
+          }}
         />
       </div>
       <TableBuilder

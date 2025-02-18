@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
+import { Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
 import { Plus, Trash2, GripVertical, Code } from 'lucide-react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface TableCell {
   id: string;
@@ -44,13 +42,13 @@ const defaultStyles = {
     borderCollapse: 'collapse',
   },
   header: {
-    backgroundColor: 'rgb(var(--muted))',
+    backgroundColor: 'rgb(var(--bs-secondary-bg))',
     fontWeight: '500',
     textAlign: 'left',
   },
   cell: {
     padding: '0.5rem',
-    border: '1px solid rgb(var(--border))',
+    border: '1px solid rgb(var(--bs-border-color))',
   },
 };
 
@@ -157,72 +155,67 @@ export function TableBuilder({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle className="flex justify-between items-center">
-            <span>Table Builder</span>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowJson(!showJson)}
-                className="gap-2"
-              >
-                <Code className="h-4 w-4" />
-                {showJson ? 'Hide' : 'Show'} JSON
-              </Button>
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSave}>Save Table</Button>
-            </div>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="py-4">
-          <div className="flex justify-end gap-2 mb-4">
-            <Button onClick={addRow} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Row
+    <Modal show={open} onHide={() => onOpenChange(false)} size="xl">
+      <Modal.Header>
+        <Modal.Title className="d-flex justify-content-between align-items-center w-100">
+          <span>Table Builder</span>
+          <div className="d-flex gap-2">
+            <Button
+              variant="outline-secondary"
+              size="sm"
+              onClick={() => setShowJson(!showJson)}
+              className="d-flex align-items-center gap-2"
+            >
+              <Code className="h-4 w-4" />
+              {showJson ? 'Hide' : 'Show'} JSON
             </Button>
-            <Button onClick={addColumn} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Column
+            <Button variant="outline-secondary" onClick={() => onOpenChange(false)}>
+              Cancel
             </Button>
+            <Button variant="primary" onClick={handleSave}>Save Table</Button>
           </div>
+        </Modal.Title>
+      </Modal.Header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <Modal.Body className="py-4">
+        <div className="d-flex justify-content-end gap-2 mb-4">
+          <Button onClick={addRow} className="d-flex align-items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Row
+          </Button>
+          <Button onClick={addColumn} className="d-flex align-items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Column
+          </Button>
+        </div>
+
+        <div className="row">
+          <div className={`${showJson ? 'col-lg-6' : 'col-12'}`}>
             <Card className="p-4">
-              <div ref={parent} className="w-full overflow-x-auto">
-                <table className="w-full border-collapse">
+              <div ref={parent} className="table-responsive">
+                <table className="table">
                   <thead>
                     <tr>
-                      <th className="w-8"></th>
+                      <th style={{ width: '2rem' }}></th>
                       {tableData.headers.map((header, index) => (
                         <th key={header.id} className="p-2">
-                          <div className="space-y-2">
-                            <Input
+                          <div className="d-flex flex-column gap-2">
+                            <Form.Control
                               value={header.content}
                               onChange={(e) => updateHeader(header.id, { content: e.target.value })}
-                              className="min-w-[100px]"
+                              className="min-width-100"
                             />
-                            <Select
+                            <Form.Select
                               value={header.align || 'left'}
-                              onValueChange={(value) => updateHeader(header.id, { align: value as 'left' | 'center' | 'right' })}
+                              onChange={(e) => updateHeader(header.id, { align: e.target.value as 'left' | 'center' | 'right' })}
                             >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="left">Left</SelectItem>
-                                <SelectItem value="center">Center</SelectItem>
-                                <SelectItem value="right">Right</SelectItem>
-                              </SelectContent>
-                            </Select>
+                              <option value="left">Left</option>
+                              <option value="center">Center</option>
+                              <option value="right">Right</option>
+                            </Form.Select>
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="link"
+                              size="sm"
                               onClick={() => removeColumn(index)}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -235,12 +228,12 @@ export function TableBuilder({
                   <tbody>
                     {tableData.rows.map((row) => (
                       <tr key={row.id}>
-                        <td className="w-8">
-                          <div className="flex items-center">
-                            <GripVertical className="h-4 w-4 text-muted-foreground cursor-move" />
+                        <td style={{ width: '2rem' }}>
+                          <div className="d-flex align-items-center">
+                            <GripVertical className="h-4 w-4 text-muted cursor-move" />
                             <Button
-                              variant="ghost"
-                              size="icon"
+                              variant="link"
+                              size="sm"
                               onClick={() => removeRow(row.id)}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -249,25 +242,20 @@ export function TableBuilder({
                         </td>
                         {row.cells.map((cell) => (
                           <td key={cell.id} className="p-2">
-                            <div className="space-y-2">
-                              <Input
+                            <div className="d-flex flex-column gap-2">
+                              <Form.Control
                                 value={cell.content}
                                 onChange={(e) => updateCell(row.id, cell.id, { content: e.target.value })}
-                                className="min-w-[100px]"
+                                className="min-width-100"
                               />
-                              <Select
+                              <Form.Select
                                 value={cell.type || 'text'}
-                                onValueChange={(value) => updateCell(row.id, cell.id, { type: value as 'text' | 'number' | 'date' })}
+                                onChange={(e) => updateCell(row.id, cell.id, { type: e.target.value as 'text' | 'number' | 'date' })}
                               >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="text">Text</SelectItem>
-                                  <SelectItem value="number">Number</SelectItem>
-                                  <SelectItem value="date">Date</SelectItem>
-                                </SelectContent>
-                              </Select>
+                                <option value="text">Text</option>
+                                <option value="number">Number</option>
+                                <option value="date">Date</option>
+                              </Form.Select>
                             </div>
                           </td>
                         ))}
@@ -277,18 +265,20 @@ export function TableBuilder({
                 </table>
               </div>
             </Card>
+          </div>
 
-            {showJson && (
+          {showJson && (
+            <div className="col-lg-6">
               <Card className="p-4">
-                <pre className="text-xs whitespace-pre-wrap">
-                  {JSON.stringify(tableData, null, 2)}
+                <pre className="small">
+                  {JSON.stringify({ headers: tableData.headers, rows: tableData.rows }, null, 2)}
                 </pre>
               </Card>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </Modal.Body>
+    </Modal>
   );
 }
 
@@ -314,7 +304,7 @@ function generateTableHtml(config: TableConfig): string {
       .join('; ');
 
   return `
-    <table style="${styleToString(tableStyles)}">
+    <table class="table table-bordered" style="${styleToString(tableStyles)}">
       <thead>
         <tr>
           ${config.headers.map(header => `
