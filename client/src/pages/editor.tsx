@@ -431,17 +431,17 @@ export default function Editor() {
   return (
     <div className="container-fluid">
       <div className="row">
-        <div className="col-3">
+        <div className="col-2">
           <Sidebar />
         </div>
 
-        <div className="col-6">
+        <div className="col-8">
           <div
             className={`flex-grow-1 overflow-auto p-8 ${selectedElement ? "mr-80" : ""}`}
           >
             {" "}
             {/* Note: Keep Tailwind mr-80 since no direct Bootstrap equivalent */}
-            <div className="mx-auto" style={{ maxWidth: "960px" }}>
+            <div className="mx-auto container-fluid" style={{ maxWidth: "960px" }}>
               {" "}
               {/* max-width 4xl equivalent to 960px */}
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -531,7 +531,7 @@ export default function Editor() {
             onOpenChange={setShowHtmlPreview}
           />
         </div>
-        <div className="col-3">
+        <div className="col-2">
           <div className={` ${selectedElement ? "" : "hidden"}`}>
             <div className="p-4 h-100">
               <PropertiesPanel

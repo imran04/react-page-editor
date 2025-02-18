@@ -1,5 +1,6 @@
 import { ComponentProps } from 'react';
 import { DragIcon } from './drag-icon';
+import { Expand } from 'lucide-react';
 
 interface DragHandleProps extends ComponentProps<'button'> {
   dragListeners?: any;
@@ -14,12 +15,12 @@ export function DragHandle({
 }: DragHandleProps) {
   return (
     <button
-      className={`p-2 hover:bg-muted rounded cursor-move ${className}`}
+      className={` ${className} drag-control-button`}
       {...dragAttributes}
       {...dragListeners}
       {...props}
     >
-      <img className="move-icon" src="/www/move.png" alt="Drag handle"/>
+      <Expand className="w-4 h-4" />
     </button>
   );
 }

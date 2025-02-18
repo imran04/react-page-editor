@@ -133,7 +133,7 @@ export function Sidebar() {
   };
 
   return (
-    <Card className="h-100 p-3">
+    <Card className="h-100 p-3 position-fixed">
       <h2 className="fw-bold mb-4">Content Blocks</h2>
       <Tab.Container defaultActiveKey="layout">
         <Nav variant="tabs" className="mb-3">

@@ -7,8 +7,9 @@
 }
 
 .toolbar-draggable {
-  position: absolute;
-  top: -37px;
+  height: 20px;
+    position: relative;
+   top:-20px; 
   display: none;
 }
 
@@ -17,9 +18,14 @@
 }
 
 .selected {
-  background-color: var(--bs-primary);
+  float: right;
+  padding: 3px;
+  width: 6%;
+  background-color: #dd36f8;
   color: #fff;
   display: flex !important;
+  min-height: 21px;
+ 
 }
 
 .rv:hover>.toolbar-draggable {
@@ -69,4 +75,14 @@
 
 .min-width-100 {
   min-width: 100px;
+}
+
+.border-dashed{
+  border: 1px dashed #1a1823;
+}
+.drag-control-button{
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  line-height: 1px;
 }

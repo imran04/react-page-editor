@@ -102,7 +102,7 @@ export function Row({
     <div
       ref={setNodeRef}
       style={{ ...style, ...styles }}
-      className="mb-4 relative group rw"
+      className=""
       onClick={(e) => {
       e.stopPropagation();
       onSelect();
@@ -112,12 +112,12 @@ export function Row({
       {...attributes}
       {...sortableAttributes}
     >
-      <Card className={`p-4 ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
-        <div className={`mb-2 flex justify-between items-center toolbar-draggable ${isSelected|| mouseOver ? 'selected' : ''}`}>
+      <div className={`row ${isSelected && showBorders ? 'ring-2 ring-primary ring-dashed' : ''} transition-all duration-200`}>
+        <div className={`col-12 toolbar-draggable ${isSelected|| mouseOver ? 'selected' : ''}`}>
           <DragHandle dragListeners={listeners} />
-          <div className="text-xs ">
+          {/* <div className="text-xs ">
             {totalColumns}/12 columns used
-          </div>
+          </div> */}
           <DeleteButton onDelete={onRemoveRow} />
         </div>
         <SortableContext
@@ -125,19 +125,19 @@ export function Row({
           strategy={horizontalListSortingStrategy}
         >
           <div
-            className="flex flex-wrap -mx-2"
+            className="row"
             onDragOver={handleDragOver}
             onDrop={handleDrop}
           >
             {columns.length === 0 ? (
               <div className="w-full px-2">
-                <div className="h-24 border-2 border-dashed border-muted-foreground/50 rounded-lg flex items-center justify-center">
+                <div className="h-24 border-2 border-dashed p-3 rounded-lg  text-center justify-center">
                   <p className="text-muted-foreground">Drop columns here</p>
                 </div>
               </div>
             ) : (
               columns.map(column => (
-                <div key={column.id} className="px-2">
+                // <div key={column.id} className="px-2">
                   <Column
                     id={column.id}
                     type={column.type}
@@ -154,12 +154,12 @@ export function Row({
                     attributes={column.attributes || {}}
                     showBorders={showBorders}
                   />
-                </div>
+                // </div>
               ))
             )}
           </div>
         </SortableContext>
-      </Card>
+      </div>
     </div>
   );
 }

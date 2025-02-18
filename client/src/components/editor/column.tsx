@@ -93,7 +93,7 @@ export function Column({
     <div
       ref={setNodeRef}
       style={{ ...style }}
-      className={`${columnClasses} relative group`}
+      className={`${columnClasses} relative group ${type}`}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
