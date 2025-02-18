@@ -22,7 +22,7 @@
   display: flex !important;
 }
 
-.rv:hover > .toolbar-draggable {
+.rv:hover>.toolbar-draggable {
   display: block !important;
 }
 
@@ -47,7 +47,7 @@
   background: white;
   border-radius: 4px;
   padding: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* Utility classes */

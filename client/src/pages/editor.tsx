@@ -429,13 +429,13 @@ export default function Editor() {
   };
 
   return (
-    <div className="container">
+    <div className="container-fluid">
       <div className="row">
         <div className="col-3">
           <Sidebar />
         </div>
 
-        <div className="col-9">
+        <div className="col-6">
           <div
             className={`flex-grow-1 overflow-auto p-8 ${selectedElement ? "mr-80" : ""}`}
           >
@@ -525,11 +525,14 @@ export default function Editor() {
             </div>
           </div>
 
-          <div
-            className={`position-fixed right-0 top-0 bottom-0 w-80 border-left bg-white transform transition-transform duration-200 ease-in-out ${
-              selectedElement ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
+          <HtmlPreview
+            data={pageData}
+            open={showHtmlPreview}
+            onOpenChange={setShowHtmlPreview}
+          />
+        </div>
+        <div className="col-3">
+          <div className={` ${selectedElement ? "" : "hidden"}`}>
             <div className="p-4 h-100">
               <PropertiesPanel
                 selectedElement={selectedElement}
@@ -538,18 +541,7 @@ export default function Editor() {
               />
             </div>
           </div>
-
-          <HtmlPreview
-            data={pageData}
-            open={showHtmlPreview}
-            onOpenChange={setShowHtmlPreview}
-          />
-
-          <div
-            className={`position-fixed right-0 top-0 bottom-0 w-96 border-left bg-white overflow-auto transition-all duration-300 ease-in-out ${
-              showJsonPreview ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
+          <div className={` ${showJsonPreview ? "" : "hidden"}`}>
             <div className="p-4">
               <JsonPreview data={pageData} />
             </div>
